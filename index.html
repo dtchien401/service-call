@@ -1,169 +1,240 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Service Call Performance</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
-<style>
-:root{--cali-red:#d71920;--deep:#121318;--ink:#202633;--muted:#6b7280;--line:#e6e8ee;--panel:#ffffff;--bg:#f3f4f6;--soft-red:#fff4f4;--green:#16a34a;--amber:#f59e0b;--blue:#0f75bc}
-*{box-sizing:border-box} body{font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(--ink);font-size:14px}.wrap{max-width:1540px;margin:0 auto;padding:16px}.hero{background:linear-gradient(135deg,#101114 0%,#1f222b 62%,#8b1117 160%);color:white;border-top:6px solid var(--cali-red);box-shadow:0 12px 28px rgba(15,23,42,.12);border-radius:18px}.brand-logo{width:112px;height:44px;object-fit:contain;background:white;border-radius:9px;padding:6px;box-shadow:0 8px 18px rgba(0,0,0,.18)}.hero h1{font-size:30px;line-height:1.05;font-weight:1000;letter-spacing:.02em}.hero .subtitle{color:#fecaca;font-weight:900;letter-spacing:.14em;text-transform:uppercase;font-size:11px}.input{border:1px solid #d1d5db;border-radius:10px;padding:9px 11px;color:#111827;background:white;min-height:42px}.input:focus{outline:2px solid rgba(215,25,32,.22);border-color:var(--cali-red)}#applyBtn{background:#d71920;color:white;border:none;box-shadow:0 10px 20px rgba(215,25,32,.22)}#applyBtn:hover{background:#b9141b}.card{background:var(--panel);border:1px solid var(--line);box-shadow:0 6px 18px rgba(17,24,39,.06);border-radius:16px;overflow:hidden}.section{background:#fff;color:#111827;font-weight:1000;padding:13px 16px;border-bottom:1px solid var(--line);border-left:6px solid var(--cali-red);letter-spacing:.01em}.mini-head{background:#111217;color:#fff;font-weight:1000}.scroll{overflow:auto}.chart{height:310px}.mono{font-variant-numeric:tabular-nums}
-table{width:100%;border-collapse:separate;border-spacing:0;font-size:13px}th,td{border-bottom:1px solid var(--line);padding:10px 11px;vertical-align:middle}th{background:#1f2937;color:white;font-weight:900;font-size:12px;white-space:nowrap}td{border-right:1px solid #f0f1f4}td:last-child,th:last-child{border-right:0}tbody tr:nth-child(odd){background:#fffafa}tbody tr:nth-child(even){background:#fff}tbody tr:hover{background:#f8fafc}.total td{background:#111217!important;color:#fff;font-weight:900}.heat{text-align:center;font-weight:1000}.g5{background:#16a34a!important;color:white}.g4{background:#bbf7d0!important;color:#064e3b}.g3{background:#fff7ed!important;color:#9a3412}.g2{background:#fee2e2!important;color:#991b1b}.g1{background:#ef4444!important;color:white}.pill{display:inline-flex;gap:6px;align-items:center;padding:4px 10px;border-radius:999px;font-weight:900;font-size:12px;white-space:nowrap}.ok{background:#dcfce7;color:#166534}.warn{background:#fff7ed;color:#9a3412}.bad{background:#fee2e2;color:#b91c1c}.neutral{background:#f3f4f6;color:#4b5563}
-.kpi{background:#fff!important;color:#111827!important;border:1px solid var(--line);border-radius:16px;padding:15px 14px!important;box-shadow:0 6px 18px rgba(17,24,39,.06);position:relative;overflow:hidden;text-align:left}.kpi:before{content:"";position:absolute;left:0;top:0;height:100%;width:5px;background:var(--cali-red)}.kpi .label{font-size:12px;color:#6b7280;text-transform:uppercase;letter-spacing:.06em;font-weight:1000}.kpi .value{font-size:24px;line-height:1.15;margin-top:6px;color:#111827;font-weight:1000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.kpi .hint{font-size:12px;color:#6b7280;margin-top:5px}.kpi.green:before{background:#16a34a}.kpi.sky:before,.kpi.red:before{background:#d71920}.kpi.orange:before{background:#f59e0b}.kpi.purple:before{background:#6d38c7}.kpi.blue:before{background:#374151}
-.appgrid{display:grid;grid-template-columns:235px minmax(0,1fr);gap:16px;align-items:start}.sidebar{position:sticky;top:14px;background:#111217;border:1px solid #272a31;box-shadow:0 10px 26px rgba(17,24,39,.12);overflow:hidden;border-radius:16px}.sidebar-title{background:#d71920;color:#fff;font-weight:1000;padding:14px 16px;border-bottom:1px solid #7f1d1d;letter-spacing:.06em;text-transform:uppercase}.side-tab{width:100%;display:flex;align-items:center;gap:10px;text-align:left;font-weight:900;padding:13px 15px;border-left:5px solid transparent;color:#e5e7eb;background:#111217;border-bottom:1px solid #272a31}.side-tab:hover{background:#1f2937;color:#fff}.side-tab.active{background:#fff;color:#111217;border-left-color:#d71920}.side-tab .ico{width:22px;text-align:center}.mainpanel{min-width:0}.panel-title{font-weight:1000;font-size:15px;margin-bottom:10px}.callout{background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px;box-shadow:0 6px 18px rgba(17,24,39,.05)}
-@media(max-width:1100px){.appgrid{grid-template-columns:1fr}.sidebar{position:relative;top:auto}.sidebar-nav{display:grid;grid-template-columns:repeat(5,minmax(140px,1fr));overflow:auto}.side-tab{border-left:0;border-bottom:4px solid transparent;justify-content:center}.side-tab.active{border-bottom-color:#d71920}}@media(max-width:900px){.wrap{min-width:1280px}}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cali Member Success Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root{--cali:#d71920;--ink:#111827;--muted:#6b7280;--line:#e5e7eb;--soft:#f8fafc}
+    *{box-sizing:border-box} body{font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif;background:#f6f7fb;color:var(--ink)}
+    .card{background:#fff;border:1px solid #e9edf3;border-radius:22px;box-shadow:0 10px 30px rgba(15,23,42,.06)}
+    .kpi{background:linear-gradient(180deg,#fff,#fbfcff);border:1px solid #e9edf3;border-radius:22px;box-shadow:0 10px 24px rgba(15,23,42,.05)}
+    .tab.active{background:var(--cali);color:white;box-shadow:0 8px 18px rgba(215,25,32,.25)}
+    .tab{transition:.2s}.pill{border:1px solid #e5e7eb;border-radius:999px;background:white}.good{color:#16a34a}.warn{color:#d97706}.bad{color:#dc2626}.neutral{color:#64748b}
+    .chartbox{position:relative;height:330px}.chartbox-sm{position:relative;height:270px}.chartbox-lg{position:relative;height:390px}
+    table{border-collapse:separate;border-spacing:0} th{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:#64748b;background:#f8fafc;position:sticky;top:0} td,th{padding:12px 14px;border-bottom:1px solid #eef2f7} tr:hover td{background:#fcfcfd}
+    .riskbar{height:8px;border-radius:99px;background:#e5e7eb;overflow:hidden}.riskbar>span{display:block;height:100%;background:var(--cali)}
+    @media(max-width:900px){.chartbox,.chartbox-sm,.chartbox-lg{height:280px}.desktop-table{min-width:900px}.tabs-wrap{overflow-x:auto}.tab{white-space:nowrap}}
+  </style>
 </head>
 <body>
-<div class="wrap">
-<header class="hero p-5 mb-4 rounded-xl">
-  <div class="flex flex-wrap items-center justify-between gap-4">
-    <div class="flex items-center gap-4">
-      <img src="logo.png" alt="California Fitness" class="brand-logo" onerror="this.style.display='none'">
-      <div>
-        <div class="subtitle">California Fitness & Yoga</div>
-        <h1 class="text-3xl">SERVICE CALL PERFORMANCE</h1>
+  <div class="max-w-[1600px] mx-auto p-4 md:p-6">
+    <header class="card p-5 md:p-6 mb-5 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+      <div class="flex items-center gap-4">
+        <div class="w-12 h-12 rounded-2xl bg-[#d71920] text-white font-black flex items-center justify-center">CS</div>
+        <div>
+          <h1 class="text-2xl md:text-3xl font-black tracking-tight">Cali Member Success Dashboard</h1>
+          <p class="text-sm text-slate-500 mt-1">Service Call → Activation → Retention → Conversion → Staff Impact</p>
+        </div>
       </div>
-    </div>
-    <div class="hidden md:flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm font-black text-red-100">☎ Recovery Control Tower</div>
+      <div class="flex flex-col sm:flex-row gap-2 sm:items-center">
+        <label class="pill px-4 py-2 text-sm font-semibold cursor-pointer">
+          Upload CSV <input id="fileInput" type="file" accept=".csv" class="hidden" />
+        </label>
+        <button id="resetBtn" class="pill px-4 py-2 text-sm font-semibold">Reset Filters</button>
+        <div id="loadStatus" class="text-xs text-slate-500 px-2">Loading servicecall.csv...</div>
+      </div>
+    </header>
+
+    <section class="card p-4 mb-5">
+      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-6 gap-3">
+        <div><label class="text-xs font-bold text-slate-500 uppercase">Period</label><select id="periodFilter" class="mt-1 w-full border rounded-xl px-3 py-2 bg-white"></select></div>
+        <div><label class="text-xs font-bold text-slate-500 uppercase">Club</label><select id="clubFilter" class="mt-1 w-full border rounded-xl px-3 py-2 bg-white"></select></div>
+        <div><label class="text-xs font-bold text-slate-500 uppercase">Call Type</label><select id="typeFilter" class="mt-1 w-full border rounded-xl px-3 py-2 bg-white"></select></div>
+        <div><label class="text-xs font-bold text-slate-500 uppercase">Staff</label><select id="staffFilter" class="mt-1 w-full border rounded-xl px-3 py-2 bg-white"></select></div>
+        <div><label class="text-xs font-bold text-slate-500 uppercase">Status</label><select id="statusFilter" class="mt-1 w-full border rounded-xl px-3 py-2 bg-white"></select></div>
+        <div><label class="text-xs font-bold text-slate-500 uppercase">Search</label><input id="searchInput" placeholder="Client / phone / contract" class="mt-1 w-full border rounded-xl px-3 py-2 bg-white" /></div>
+      </div>
+    </section>
+
+    <nav class="tabs-wrap flex gap-2 mb-5">
+      <button class="tab active px-4 py-2 rounded-full font-bold text-sm" data-tab="overview">Executive Overview</button>
+      <button class="tab px-4 py-2 rounded-full font-bold text-sm bg-white border" data-tab="club">Club Health</button>
+      <button class="tab px-4 py-2 rounded-full font-bold text-sm bg-white border" data-tab="staff">Staff Performance</button>
+      <button class="tab px-4 py-2 rounded-full font-bold text-sm bg-white border" data-tab="customer">Customer Risk</button>
+      <button class="tab px-4 py-2 rounded-full font-bold text-sm bg-white border" data-tab="root">Root Cause</button>
+    </nav>
+
+    <main>
+      <section id="overview" class="tabpane">
+        <div id="kpiGrid" class="grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-8 gap-3 mb-5"></div>
+        <div class="grid grid-cols-1 xl:grid-cols-2 gap-5 mb-5">
+          <div class="card p-5"><h3 class="font-extrabold text-lg">Service Impact Funnel</h3><p class="text-sm text-slate-500 mb-3">Assigned → Contacted → Closed → Returned → Signed</p><div class="chartbox"><canvas id="funnelChart"></canvas></div></div>
+          <div class="card p-5"><h3 class="font-extrabold text-lg">Cases by Call Type</h3><p class="text-sm text-slate-500 mb-3">Volume mix of service reasons</p><div class="chartbox"><canvas id="typeChart"></canvas></div></div>
+        </div>
+        <div class="grid grid-cols-1 xl:grid-cols-3 gap-5">
+          <div class="card p-5 xl:col-span-2"><h3 class="font-extrabold text-lg">Monthly Trend</h3><p class="text-sm text-slate-500 mb-3">Cases, Return Rate and Sign Rate by EOM</p><div class="chartbox-lg"><canvas id="trendChart"></canvas></div></div>
+          <div class="card p-5"><h3 class="font-extrabold text-lg">Risk Mix</h3><p class="text-sm text-slate-500 mb-3">Customer status after service call</p><div class="chartbox-lg"><canvas id="riskPie"></canvas></div></div>
+        </div>
+      </section>
+
+      <section id="club" class="tabpane hidden">
+        <div class="grid grid-cols-1 xl:grid-cols-2 gap-5 mb-5">
+          <div class="card p-5"><h3 class="font-extrabold text-lg">Top Clubs by Return Rate</h3><p class="text-sm text-slate-500 mb-3">Only clubs with meaningful case volume</p><div class="chartbox"><canvas id="clubReturnChart"></canvas></div></div>
+          <div class="card p-5"><h3 class="font-extrabold text-lg">Bottom Clubs by Return Rate</h3><p class="text-sm text-slate-500 mb-3">Priority clubs for GM / Ops review</p><div class="chartbox"><canvas id="clubBottomChart"></canvas></div></div>
+        </div>
+        <div class="card p-5"><h3 class="font-extrabold text-lg mb-3">Club Health Ranking</h3><div class="overflow-auto max-h-[580px]"><table class="w-full desktop-table"><thead><tr><th>Club</th><th>Cases</th><th>Contact %</th><th>Closed %</th><th>Return %</th><th>Sign %</th><th>Avg CSAT</th><th>Risk</th></tr></thead><tbody id="clubTable"></tbody></table></div></div>
+      </section>
+
+      <section id="staff" class="tabpane hidden">
+        <div id="staffCards" class="grid grid-cols-1 md:grid-cols-4 gap-3 mb-5"></div>
+        <div class="grid grid-cols-1 xl:grid-cols-2 gap-5 mb-5">
+          <div class="card p-5"><h3 class="font-extrabold text-lg">Staff Performance Score</h3><p class="text-sm text-slate-500 mb-3">Score = Volume 30% + Close 25% + Return 25% + Sign 20%</p><div class="chartbox"><canvas id="staffScoreChart"></canvas></div></div>
+          <div class="card p-5"><h3 class="font-extrabold text-lg">Cases vs Return Rate</h3><p class="text-sm text-slate-500 mb-3">High volume + high return = true performer</p><div class="chartbox"><canvas id="staffScatterChart"></canvas></div></div>
+        </div>
+        <div class="card p-5"><h3 class="font-extrabold text-lg mb-3">Staff Ranking</h3><div class="overflow-auto max-h-[580px]"><table class="w-full desktop-table"><thead><tr><th>Staff</th><th>Club</th><th>Cases</th><th>Closed %</th><th>Return %</th><th>Sign %</th><th>Avg Days Close</th><th>Score</th></tr></thead><tbody id="staffTable"></tbody></table></div></div>
+      </section>
+
+      <section id="customer" class="tabpane hidden">
+        <div id="riskCards" class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5"></div>
+        <div class="grid grid-cols-1 xl:grid-cols-2 gap-5 mb-5">
+          <div class="card p-5"><h3 class="font-extrabold text-lg">Check-in Before vs After</h3><p class="text-sm text-slate-500 mb-3">Behavior lift by call type</p><div class="chartbox"><canvas id="checkinLiftChart"></canvas></div></div>
+          <div class="card p-5"><h3 class="font-extrabold text-lg">Days to Return</h3><p class="text-sm text-slate-500 mb-3">Speed of customer reactivation</p><div class="chartbox"><canvas id="returnDaysChart"></canvas></div></div>
+        </div>
+        <div class="card p-5"><h3 class="font-extrabold text-lg mb-3">Recent Customer Cases</h3><div class="overflow-auto max-h-[520px]"><table class="w-full desktop-table"><thead><tr><th>Client</th><th>Phone</th><th>Club</th><th>Call Type</th><th>Status</th><th>Before</th><th>After</th><th>Returned</th><th>Signed</th></tr></thead><tbody id="caseTable"></tbody></table></div></div>
+      </section>
+
+      <section id="root" class="tabpane hidden">
+        <div class="grid grid-cols-1 xl:grid-cols-2 gap-5 mb-5">
+          <div class="card p-5"><h3 class="font-extrabold text-lg">Complaint / Feedback Tags</h3><p class="text-sm text-slate-500 mb-3">Root causes from Tag Complaint</p><div class="chartbox"><canvas id="complaintChart"></canvas></div></div>
+          <div class="card p-5"><h3 class="font-extrabold text-lg">CSAT Distribution</h3><p class="text-sm text-slate-500 mb-3">Re-CSAT preferred, fallback to CSAT</p><div class="chartbox"><canvas id="csatChart"></canvas></div></div>
+        </div>
+        <div class="card p-5"><h3 class="font-extrabold text-lg mb-3">Root Cause Detail</h3><div class="overflow-auto max-h-[580px]"><table class="w-full desktop-table"><thead><tr><th>Tag</th><th>Cases</th><th>Return %</th><th>Sign %</th><th>Avg CSAT</th><th>Main Clubs</th></tr></thead><tbody id="rootTable"></tbody></table></div></div>
+      </section>
+    </main>
   </div>
-  <div class="grid grid-cols-2 md:grid-cols-6 gap-3 mt-6 items-end">
-    <label class="text-sm text-blue-100">From<input id="fromDate" type="date" class="input w-full mt-1"></label>
-    <label class="text-sm text-blue-100">To<input id="toDate" type="date" class="input w-full mt-1"></label>
-    <label class="text-sm text-blue-100">Club<select id="clubFilter" class="input w-full mt-1"><option value="ALL">All</option></select></label>
-    <label class="text-sm text-blue-100">Call Type<select id="typeFilter" class="input w-full mt-1"><option value="ALL">All</option></select></label>
-    <label class="text-sm text-blue-100">Staff<select id="staffFilter" class="input w-full mt-1"><option value="ALL">All</option></select></label>
-    <div class="flex gap-2"><button id="applyBtn" class="input bg-white font-black cali-apply">Apply Filter</button></div>
-  </div>
-  <div id="loadStatus" class="text-xs text-blue-100 mt-3">Loading servicecall.csv...</div>
-</header>
 
-<section id="kpis" class="grid grid-cols-2 md:grid-cols-6 gap-3 mb-4"></section>
-
-<div class="appgrid">
-<aside class="sidebar">
-  <div class="sidebar-title">CALIFORNIA MENU</div>
-  <div class="sidebar-nav">
-    <button class="tab side-tab active" data-tab="overview"><span class="ico">📊</span><span>Overview</span></button>
-    <button class="tab side-tab" data-tab="staff"><span class="ico">👤</span><span>Staff Performance</span></button>
-    <button class="tab side-tab" data-tab="club"><span class="ico">🏅</span><span>Club Performance</span></button>
-    <button class="tab side-tab" data-tab="topbottom"><span class="ico">🏆</span><span>Top / Bottom</span></button>
-    <button class="tab side-tab" data-tab="raw"><span class="ico">📋</span><span>Raw Data</span></button>
-  </div>
-</aside>
-
-<main class="mainpanel">
-<section id="tab-overview" class="tabpage">
-  <div class="grid grid-cols-1 xl:grid-cols-3 gap-4 mb-4">
-    <div class="card xl:col-span-2 p-5"><div class="panel-title">Monthly Return / Sign / Contact Trend</div><div class="chart"><canvas id="trendChart"></canvas></div></div>
-    <div class="card"><div class="section">🚨 Action Alerts</div><div class="scroll"><table id="alertTable"></table></div></div>
-  </div>
-  <div class="grid grid-cols-1 xl:grid-cols-2 gap-4 mb-4">
-    <div class="card"><div class="section">Call Type Effectiveness</div><div class="scroll"><table id="funnelTable"></table></div></div>
-    <div class="card"><div class="section">Monthly Recovery Summary</div><div class="scroll"><table id="monthTable"></table></div></div>
-  </div>
-  <div class="card"><div class="section">Contact Method Matrix</div><div class="scroll"><table id="methodTable"></table></div></div>
-</section>
-
-<section id="tab-staff" class="tabpage hidden">
-  <div class="card mb-4"><div class="section text-center">Staff Performance Ranking</div><div class="scroll"><table id="staffTable"></table></div></div>
-  <div class="grid grid-cols-1 xl:grid-cols-2 gap-4"><div class="card"><div class="section bg-emerald-700 text-white">👤 TOP 5 STAFF PERFORMANCE</div><table id="topStaff"></table></div><div class="card p-4"><div class="font-black mb-2">Staff Quadrant: Calls vs Return Rate</div><div class="chart"><canvas id="staffScatter"></canvas></div></div></div>
-</section>
-
-<section id="tab-club" class="tabpage hidden">
-  <div class="card mb-4"><div class="section text-center">Club Recovery Performance</div><div class="scroll"><table id="clubTable"></table></div></div>
-  <div class="grid grid-cols-1 xl:grid-cols-2 gap-4 mb-4"><div class="card p-4"><div class="font-black mb-2">Club Risk Quadrant: Calls vs Return Rate</div><div class="chart"><canvas id="clubRisk"></canvas></div></div><div class="card"><div class="section">ZNS / Re-ZNS PERFORMANCE BY CLUB</div><div class="scroll"><table id="znsTable"></table></div></div></div>
-</section>
-
-<section id="tab-topbottom" class="tabpage hidden">
-  <div class="card mb-4"><div class="mini-head p-2 text-center text-xl">🏆 TOP 5 vs BOTTOM 5 — Return Rate</div><div class="grid grid-cols-1 xl:grid-cols-2"><table id="topClub"></table><table id="bottomClub"></table></div></div>
-  <div class="card"><div class="mini-head p-2 text-center text-xl">👤 TOP 5 vs BOTTOM 5 — Staff</div><div class="grid grid-cols-1 xl:grid-cols-2"><table id="topStaff2"></table><table id="bottomStaff"></table></div></div>
-</section>
-
-<section id="tab-raw" class="tabpage hidden"><div class="card p-3"><input id="searchBox" class="input w-full mb-3" placeholder="Search raw data..."><div id="rowCount" class="text-sm font-bold mb-2"></div><div class="scroll"><table id="rawTable"></table></div></div></section>
-</main>
-</div>
-</div>
 <script>
-const CSV_URLS=['servicecall.csv','./servicecall.csv']; const CLOSED=new Set(['FIN SERVE','CA360']); let rawRows=[],filteredRows=[],charts={};
-const $=id=>document.getElementById(id); const norm=v=>(v??'').toString().trim(); const num=v=>{const n=Number(norm(v).replace(/,/g,''));return isFinite(n)?n:0}; const fmtInt=n=>(Number(n)||0).toLocaleString('en-US'); const fmtPct=n=>isFinite(n)?(n*100).toFixed(1)+'%':'0.0%';
-function dateVal(v){const s=norm(v); if(!s||s==='NULL')return null; let m=s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/); if(m)return new Date(+m[3],+m[2]-1,+m[1]); m=s.match(/^(\d{1,2})-([A-Za-z]{3})-(\d{4})$/); if(m){const mm={jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,oct:9,nov:10,dec:11}[m[2].toLowerCase()]; return new Date(+m[3],mm,+m[1]);} const n=Number(s); if(isFinite(n)&&n>30000&&n<70000){return new Date(Date.UTC(1899,11,30)+n*86400000)} let d=new Date(s); return isNaN(d)?null:d} function ym(d){return d?`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`:''} function ml(k){const [y,m]=k.split('-');return new Date(+y,+m-1,1).toLocaleDateString('en-GB',{month:'short',year:'2-digit'}).replace(' ','-')}
-function roleOf(s){s=norm(s); if(s.startsWith('CS'))return 'CS Team'; if(s.startsWith('TM'))return 'TM Team'; if(s.toLowerCase().includes('schedule'))return 'System'; return 'Other'}
-function clean(rows){return rows.filter(r=>norm(r['Call Type'])||norm(r['Staff Name'])||norm(r.Club)).map(r=>{const o={...r}; o._date=dateVal(o.EOM)||dateVal(o['Call Assigned Date'])||dateVal(o['Call Closed Date']); o._month=ym(o._date); o._club=norm(o.Club)||'Unknown'; o._staff=norm(o['Staff Name'])||'Unknown'; o._type=norm(o['Call Type'])||'Unknown'; o._role=roleOf(o._staff); return o})}
-function isZnsReply(r){return norm(r['Contact Method'])==='ZNS - KH Replied'} function isCalled(r){return num(r.Called)>0} function isContacted(r){return norm(r['Contact Method'])==='Called - Contacted'} function isReturned(r){return num(r['Returned To Train'])===1} function isReZnsResp(r){return num(r['ZNS_ReSurvey_Sent'])>0 && num(r['Re-CSAT Score'])>0} function isPifCase(r){return norm(r['Call Type'])==='Not Sign After PIF'} function isPifSign(r){return isPifCase(r) && !!norm(r['Contract Sign Date']) && norm(r['Contract Sign Date'])!=='NULL'} function isSystemStaff(s){s=norm(s).toLowerCase(); return !s || s==='unknown' || s.includes('schedule') || s.includes('crmbehalfprocess')}
-function newAgg(k){return {key:k,rows:0,zns:0,znsResp:0,called:0,contacted:0,rezns:0,reznsResp:0,returned:0,pifCase:0,pifReturned:0,pifSigned:0,csatS:0,csatN:0,recsatS:0,recsatN:0}}
-function agg(rows,keyFn){const m=new Map(); rows.forEach(r=>{const k=keyFn(r); if(!k)return; if(!m.has(k))m.set(k,newAgg(k)); const a=m.get(k); a.rows++; a.zns+=num(r.ZNS_Sent); if(isZnsReply(r))a.znsResp++; if(isCalled(r))a.called++; if(isContacted(r))a.contacted++; a.rezns+=num(r.ZNS_ReSurvey_Sent); if(isReZnsResp(r))a.reznsResp++; if(isReturned(r))a.returned++; if(isPifCase(r))a.pifCase++; if(isPifCase(r)&&isReturned(r))a.pifReturned++; if(isPifSign(r))a.pifSigned++; const c=num(r['CSAT Score']); if(c>0){a.csatS+=c;a.csatN++} const rc=num(r['Re-CSAT Score']); if(rc>0){a.recsatS+=rc;a.recsatN++}}); return [...m.values()].map(finish)}
-function finish(a){a.znsRate=a.zns?a.znsResp/a.zns:0; a.contactRate=a.called?a.contacted/a.called:0; a.reznsRate=a.rezns?a.reznsResp/a.rezns:0; a.returnRate=a.called?a.returned/a.called:0; a.signRate=a.pifCase?a.pifSigned/a.pifCase:0; a.csat=a.csatN?a.csatS/a.csatN:0; a.recsat=a.recsatN?a.recsatS/a.recsatN:0; a.score=a.returnRate*.45+a.signRate*.30+(Math.min(a.recsat,5)/5)*.25; return a}
-function heat(v,t='ret'){if(t==='sign'){if(v>=.4)return'g5';if(v>=.3)return'g4';if(v>=.2)return'g3';if(v>=.1)return'g2';return'g1'} if(v>=.65)return'g5'; if(v>=.55)return'g4'; if(v>=.40)return'g3'; if(v>=.25)return'g2'; return'g1'}
-function th(x){return `<th>${x}</th>`} function td(x,c=''){return `<td class="${c}">${x}</td>`} function esc(s){return norm(s).replace(/[&<>'"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[m]))}
-function band(a){
-  // Performance Band is based ONLY on Return Rate
-  // >=70%: Top Performer | >=60%: Good | >=50%: Watch | <50%: Needs Coaching
-  if(a.called<10)return ['⚫','No Data','neutral'];
-  if(a.returnRate>=.70)return ['⭐','TOP PERFORMER','ok'];
-  if(a.returnRate>=.60)return ['✅','GOOD','ok'];
-  if(a.returnRate>=.50)return ['🟡','WATCH','warn'];
-  return ['🔴','NEEDS COACHING','bad'];
+const CLOSED_CLUBS = ['VMC','LTC','TDY','JCQ','JVJ','CVC','SCC','PPC','TC1','FIN SERVE','CA360','CCC'];
+const csvPaths = ['./servicecall.csv','servicecall.csv'];
+let rawRows = [], filteredRows = [], charts = {};
+const $ = id => document.getElementById(id);
+const fmt = n => Number(n||0).toLocaleString('en-US');
+const pct = n => isFinite(n) ? (n*100).toFixed(1)+'%' : '0.0%';
+const avg = arr => arr.length ? arr.reduce((a,b)=>a+b,0)/arr.length : 0;
+const num = v => { if(v===null||v===undefined||v==='') return 0; const x=Number(String(v).replace(/,/g,'')); return isFinite(x)?x:0; };
+const clean = v => (v===null||v===undefined) ? '' : String(v).trim();
+function parseDate(v){
+  if(!v) return null; if(v instanceof Date) return v;
+  const s=String(v).trim(); if(!s) return null;
+  if(/^\d+(\.\d+)?$/.test(s)){ const d=new Date((Number(s)-25569)*86400*1000); return isNaN(d)?null:d; }
+  const d1=new Date(s); if(!isNaN(d1)) return d1;
+  const m=s.match(/^(\d{1,2})-([A-Za-z]{3})-(\d{4})$/);
+  if(m){ const mon={Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11}[m[2]]; return new Date(+m[3],mon,+m[1]); }
+  return null;
 }
-function priority(a,avg){if(a.returnRate<avg*.85)return ['🚨','P1 CRITICAL','bad']; if(a.returnRate<avg*.95)return ['🔴','BELOW TARGET','warn']; return ['✅','ON TRACK','ok']}
-function apply(){const fd=$('fromDate').value?new Date($('fromDate').value):null; const tdv=$('toDate').value?new Date($('toDate').value):null; if(tdv)tdv.setHours(23,59,59,999); const club=$('clubFilter').value,type=$('typeFilter').value,staff=$('staffFilter').value; filteredRows=rawRows.filter(r=>(!fd||r._date>=fd)&&(!tdv||r._date<=tdv)&&(club==='ALL'||r._club===club)&&(type==='ALL'||r._type===type)&&(staff==='ALL'||r._staff===staff)); renderAll()}
-function initFilters(){const ds=rawRows.map(r=>r._date).filter(Boolean).sort((a,b)=>a-b); if(ds.length){$('fromDate').value=ds[0].toISOString().slice(0,10); $('toDate').value=ds[ds.length-1].toISOString().slice(0,10)} fill('clubFilter',[...new Set(rawRows.map(r=>r._club).filter(x=>x&&!CLOSED.has(x)))].sort()); fill('typeFilter',[...new Set(rawRows.map(r=>r._type).filter(Boolean))].sort()); fill('staffFilter',[...new Set(rawRows.map(r=>r._staff).filter(Boolean))].sort())} function fill(id,vals){$(id).innerHTML='<option value="ALL">All</option>'+vals.map(v=>`<option>${esc(v)}</option>`).join('')}
-function totalAgg(){return finish(filteredRows.reduce((a,r)=>{a.rows++; a.zns+=num(r.ZNS_Sent); if(isZnsReply(r))a.znsResp++; if(isCalled(r))a.called++; if(isContacted(r))a.contacted++; a.rezns+=num(r.ZNS_ReSurvey_Sent); if(isReZnsResp(r))a.reznsResp++; if(isReturned(r))a.returned++; if(isPifCase(r))a.pifCase++; if(isPifCase(r)&&isReturned(r))a.pifReturned++; if(isPifSign(r))a.pifSigned++; const c=num(r['CSAT Score']); if(c>0){a.csatS+=c;a.csatN++} const rc=num(r['Re-CSAT Score']); if(rc>0){a.recsatS+=rc;a.recsatN++} return a},newAgg('TOTAL')))}
+function monthKey(v){ const d=parseDate(v); return d ? `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}` : clean(v)||'Unknown'; }
+function by(arr,keyFn){ return arr.reduce((m,r)=>{const k=keyFn(r)||'Unknown';(m[k]||(m[k]=[])).push(r);return m;},{}); }
+function rate(rows, fn){ return rows.length ? rows.filter(fn).length/rows.length : 0; }
+function isClosed(r){ return clean(r['Stage Status']).toLowerCase().includes('closed') || clean(r['Call Closed Date'])!==''; }
+function isContacted(r){ return num(r.Called)>0 || clean(r['Contact Method']).toLowerCase().includes('contacted'); }
+function isReturned(r){ return num(r['Returned To Train'])>0 || num(r['CheckIns After Call'])>0; }
+function isSigned(r){ return clean(r['Status Sign']).toLowerCase()==='signed'; }
+function csatVal(r){ return num(r['Re-CSAT Score']) || num(r['CSAT Score']) || null; }
+function destroy(id){ if(charts[id]) charts[id].destroy(); }
+function makeChart(id,cfg){ destroy(id); const el=$(id); if(!el) return; charts[id]=new Chart(el,cfg); }
+function commonOptions(extra={}){ return {responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:'bottom'},tooltip:{mode:'index',intersect:false}},scales:{x:{grid:{display:false}},y:{beginAtZero:true,grid:{color:'#eef2f7'}}},...extra}; }
+function topEntries(obj,metric,n=10){ return Object.entries(obj).map(([k,rows])=>({k,rows,...metric(rows)})).sort((a,b)=>(b.value||0)-(a.value||0)).slice(0,n); }
+function setOptions(id, values, allLabel='All'){ const el=$(id); const cur=el.value; el.innerHTML=`<option value="">${allLabel}</option>`+values.map(v=>`<option value="${String(v).replaceAll('"','&quot;')}">${v}</option>`).join(''); if(values.includes(cur)) el.value=cur; }
+function initFilters(){
+  const rows = rawRows.filter(r=>!CLOSED_CLUBS.includes(clean(r.Club).toUpperCase()));
+  setOptions('periodFilter',[...new Set(rows.map(r=>monthKey(r.EOM)))].sort().reverse(),'All Periods');
+  setOptions('clubFilter',[...new Set(rows.map(r=>clean(r.Club)).filter(Boolean))].sort(),'All Clubs');
+  setOptions('typeFilter',[...new Set(rows.map(r=>clean(r['Call Type'])).filter(Boolean))].sort(),'All Call Types');
+  setOptions('staffFilter',[...new Set(rows.map(r=>clean(r['Staff Name'])).filter(Boolean))].sort(),'All Staff');
+  setOptions('statusFilter',[...new Set(rows.map(r=>clean(r['Stage Status'])).filter(Boolean))].sort(),'All Status');
+}
+function applyFilters(){
+  const p=$('periodFilter').value, c=$('clubFilter').value, t=$('typeFilter').value, s=$('staffFilter').value, st=$('statusFilter').value, q=$('searchInput').value.toLowerCase().trim();
+  filteredRows = rawRows.filter(r=>{
+    if(CLOSED_CLUBS.includes(clean(r.Club).toUpperCase())) return false;
+    if(p && monthKey(r.EOM)!==p) return false; if(c && clean(r.Club)!==c) return false; if(t && clean(r['Call Type'])!==t) return false; if(s && clean(r['Staff Name'])!==s) return false; if(st && clean(r['Stage Status'])!==st) return false;
+    if(q){ const hay=[r['Client Name'],r.Phone,r['Contract Number'],r['Client ID']].map(clean).join(' ').toLowerCase(); if(!hay.includes(q)) return false; }
+    return true;
+  });
+  renderAll();
+}
+function kpiCard(label,value,sub,cls='neutral'){return `<div class="kpi p-4"><div class="text-[11px] uppercase tracking-widest font-black text-slate-400">${label}</div><div class="mt-2 text-2xl font-black ${cls}">${value}</div><div class="mt-1 text-xs text-slate-500">${sub}</div></div>`}
 function renderKPIs(){
-  const a=totalAgg();
-  const staff=agg(filteredRows.filter(isCalled),r=>r._staff).filter(x=>x.called>=10&&!isSystemStaff(x.key)).sort((x,y)=>y.returnRate-x.returnRate);
-  const clubs=agg(filteredRows,r=>r._club).filter(x=>!CLOSED.has(x.key)&&x.called>=10);
-  const avgClub=clubs.reduce((s,x)=>s+x.returnRate,0)/(clubs.length||1);
-  const p1=clubs.filter(x=>x.returnRate<avgClub*.85).length;
-  const bestStaff=staff[0]?staff[0].key.replace(/^(.{0,18}).*$/,(m)=>m.length>18?m.slice(0,18)+'…':m):'N/A';
-  const bottomStaff=staff.length?staff[staff.length-1].key.replace(/^(.{0,18}).*$/,(m)=>m.length>18?m.slice(0,18)+'…':m):'N/A';
-  const cards=[
-    ['Total Calls',fmtInt(a.called),`${fmtInt(a.contacted)} contacted`, 'blue'],
-    ['Contact Rate',fmtPct(a.contactRate),`${fmtInt(a.contacted)} / ${fmtInt(a.called)}`, 'green'],
-    ['Return Rate',fmtPct(a.returnRate),`${fmtInt(a.returned)} returned`, 'sky'],
-    ['Sign Rate',fmtPct(a.signRate),`${fmtInt(a.pifSigned)} / ${fmtInt(a.pifCase)} PIF`, 'purple'],
-    ['Avg ReCSAT',a.recsat?a.recsat.toFixed(2):'0.00','post-call score', 'orange'],
-    ['P1 Critical Clubs',fmtInt(p1),'below return target', 'red'],
-    ['Top Staff',esc(bestStaff),staff[0]?fmtPct(staff[0].returnRate):'No data', 'green'],
-    ['Bottom Staff',esc(bottomStaff),staff.length?fmtPct(staff[staff.length-1].returnRate):'No data', 'red']
-  ];
-  $('kpis').className='grid grid-cols-2 md:grid-cols-4 xl:grid-cols-8 gap-3 mb-4';
-  $('kpis').innerHTML=cards.map(c=>`<div class="kpi ${c[3]} p-3"><div class="label">${c[0]}</div><div class="value mono">${c[1]}</div><div class="hint">${c[2]}</div></div>`).join('')
+  const r=filteredRows, closed=r.filter(isClosed), contacted=r.filter(isContacted), returned=r.filter(isReturned), signed=r.filter(isSigned), csats=r.map(csatVal).filter(Boolean);
+  $('kpiGrid').innerHTML = [
+    kpiCard('Total Cases',fmt(r.length),'Assigned cases'),
+    kpiCard('Open Cases',pct(1-closed.length/(r.length||1)),`${fmt(r.length-closed.length)} open`, r.length-closed.length>0?'warn':'good'),
+    kpiCard('Contact Rate',pct(contacted.length/(r.length||1)),`${fmt(contacted.length)} contacted`,'good'),
+    kpiCard('Closed Rate',pct(closed.length/(r.length||1)),`${fmt(closed.length)} closed`),
+    kpiCard('Return Rate',pct(returned.length/(closed.length||r.length||1)),`${fmt(returned.length)} returned`,'good'),
+    kpiCard('Sign Rate',pct(signed.length/(r.length||1)),`${fmt(signed.length)} signed`,'good'),
+    kpiCard('Check-in Lift',fmt(r.reduce((a,x)=>a+num(x['CheckIns After Call'])-num(x['CheckIn 30D Before Call']),0)),'After - Before'),
+    kpiCard('Avg CSAT',avg(csats).toFixed(2),`${fmt(csats.length)} scored`)
+  ].join('');
 }
 function renderOverview(){
- const order=['Welcome','Low Check-in T30','Low Check-in T60','Not Sign After PIF'];
- const types=agg(filteredRows,r=>r._type).sort((a,b)=>order.indexOf(a.key)-order.indexOf(b.key));
- const total=totalAgg();
- const cols=['Call Type','Cases','ZNS Sent','ZNS Resp %','Calls','Contact %','Return %','PIF Cases','Signed','Sign %','Avg ReCSAT'];
- $('funnelTable').innerHTML='<thead><tr>'+cols.map(th).join('')+'</tr></thead><tbody>'+types.map(a=>`<tr>${td(a.key,'font-bold')}${td(fmtInt(a.rows),'text-center mono')}${td(fmtInt(a.zns),'text-center mono')}${td(fmtPct(a.znsRate),'heat '+heat(a.znsRate))}${td(fmtInt(a.called),'text-center mono')}${td(fmtPct(a.contactRate),'heat '+heat(a.contactRate))}${td(fmtPct(a.returnRate),'heat '+heat(a.returnRate))}${td(fmtInt(a.pifCase),'text-center mono')}${td(fmtInt(a.pifSigned),'text-center mono')}${td(fmtPct(a.signRate),'heat '+heat(a.signRate,'sign'))}${td(a.recsat?a.recsat.toFixed(2):'0.00','text-center')}</tr>`).join('')+`<tr class="total">${td('TOTAL')}${td(fmtInt(total.rows),'text-center')}${td(fmtInt(total.zns),'text-center')}${td(fmtPct(total.znsRate),'text-center')}${td(fmtInt(total.called),'text-center')}${td(fmtPct(total.contactRate),'text-center')}${td(fmtPct(total.returnRate),'text-center')}${td(fmtInt(total.pifCase),'text-center')}${td(fmtInt(total.pifSigned),'text-center')}${td(fmtPct(total.signRate),'text-center')}${td(total.recsat?total.recsat.toFixed(2):'0.00','text-center')}</tr></tbody>`;
- const methods=['ZNS - No Response','ZNS - KH Replied','Called - No Answer','Called - Contacted'];
- const head=['Contact Method',...order,'% Return After CS','% Sign contract After CS'];
- $('methodTable').innerHTML='<thead><tr>'+head.map(th).join('')+'</tr></thead><tbody>'+methods.map(m=>{const rows=filteredRows.filter(r=>norm(r['Contact Method'])===m); const ret=rows.length?rows.filter(isReturned).length/rows.length:0; const p=rows.filter(isPifCase); const sign=p.length?p.filter(isPifSign).length/p.length:0; return `<tr>${td(m,'font-bold')}`+order.map(t=>td(fmtInt(rows.filter(r=>r._type===t).length),'text-center mono')).join('')+td(fmtPct(ret),'heat '+heat(ret))+td(fmtPct(sign),'heat '+heat(sign,'sign'))+'</tr>'}).join('')+`<tr class="total">${td('TOTAL')}`+order.map(t=>td(fmtInt(filteredRows.filter(r=>r._type===t).length),'text-center')).join('')+td(fmtPct(total.called?total.returned/total.called:0),'text-center')+td(fmtPct(total.signRate),'text-center')+'</tr></tbody>';
- const months=agg(filteredRows,r=>r._month).filter(a=>a.key).sort((a,b)=>a.key.localeCompare(b.key));
- $('monthTable').innerHTML='<thead><tr>'+['Month','Calls','Contact %','Returned','Return %','PIF Cases','Signed','Sign %','Avg ReCSAT'].map(th).join('')+'</tr></thead><tbody>'+months.map(a=>`<tr>${td(ml(a.key),'font-bold text-center')}${td(fmtInt(a.called),'text-center')}${td(fmtPct(a.contactRate),'text-center')}${td(fmtInt(a.returned),'text-center')}${td(fmtPct(a.returnRate),'heat '+heat(a.returnRate))}${td(fmtInt(a.pifCase),'text-center')}${td(fmtInt(a.pifSigned),'text-center')}${td(fmtPct(a.signRate),'heat '+heat(a.signRate,'sign'))}${td(a.recsat?a.recsat.toFixed(2):'0.00','text-center')}</tr>`).join('')+'</tbody>';
- renderAlerts();
+  const r=filteredRows;
+  const funnel=[['Assigned',r.length],['Contacted',r.filter(isContacted).length],['Closed',r.filter(isClosed).length],['Returned',r.filter(isReturned).length],['Signed',r.filter(isSigned).length]];
+  makeChart('funnelChart',{type:'bar',data:{labels:funnel.map(x=>x[0]),datasets:[{label:'Cases',data:funnel.map(x=>x[1]),borderRadius:12}]},options:commonOptions({plugins:{legend:{display:false}}})});
+  const types=topEntries(by(r,x=>clean(x['Call Type'])), rows=>({value:rows.length}), 8);
+  makeChart('typeChart',{type:'doughnut',data:{labels:types.map(x=>x.k),datasets:[{data:types.map(x=>x.value)}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'}}}});
+  const months=Object.entries(by(r,x=>monthKey(x.EOM))).sort(([a],[b])=>a.localeCompare(b));
+  makeChart('trendChart',{type:'line',data:{labels:months.map(x=>x[0]),datasets:[{label:'Cases',data:months.map(x=>x[1].length),yAxisID:'y',tension:.35},{label:'Return %',data:months.map(x=>rate(x[1],isReturned)*100),yAxisID:'y1',tension:.35},{label:'Sign %',data:months.map(x=>rate(x[1],isSigned)*100),yAxisID:'y1',tension:.35}]},options:commonOptions({scales:{x:{grid:{display:false}},y:{beginAtZero:true,position:'left'},y1:{beginAtZero:true,position:'right',grid:{drawOnChartArea:false},ticks:{callback:v=>v+'%'}}}})});
+  const risk = classifyRisk(r);
+  makeChart('riskPie',{type:'pie',data:{labels:Object.keys(risk),datasets:[{data:Object.values(risk)}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'}}}});
 }
-function renderAlerts(){
- const clubs=agg(filteredRows,r=>r._club).filter(a=>!CLOSED.has(a.key)&&a.called>=10);
- const avg=clubs.reduce((s,a)=>s+a.returnRate,0)/(clubs.length||1);
- const alerts=clubs.map(a=>({type:'Club',name:a.key,calls:a.called,returnRate:a.returnRate,signRate:a.signRate,recsat:a.recsat,priority:priority(a,avg)})).filter(x=>x.priority[1]!=='ON TRACK').sort((a,b)=>a.returnRate-b.returnRate).slice(0,12);
- $('alertTable').innerHTML='<thead><tr>'+['Area','Name','Calls','Return %','Sign %','ReCSAT','Priority'].map(th).join('')+'</tr></thead><tbody>'+(alerts.length?alerts.map(a=>`<tr>${td(a.type,'font-bold')}${td(esc(a.name),'font-black text-[#0b1b46]')}${td(fmtInt(a.calls),'text-center')}${td(fmtPct(a.returnRate),'heat '+heat(a.returnRate))}${td(fmtPct(a.signRate),'heat '+heat(a.signRate,'sign'))}${td(a.recsat?a.recsat.toFixed(1):'0.0','text-center')}${td(`<span class="pill ${a.priority[2]}">${a.priority[0]} ${a.priority[1]}</span>`,'text-center')}</tr>`).join(''):`<tr>${td('No critical alerts in this filter period','text-center font-bold','')}</tr>` )+'</tbody>';
+function classifyRisk(rows){ const out={Healthy:0,Warm:0,Cold:0,Lost:0}; rows.forEach(r=>{ const after=num(r['CheckIns After Call']); if(after>=8) out.Healthy++; else if(after>=4) out.Warm++; else if(after>=1) out.Cold++; else out.Lost++; }); return out; }
+function clubMetrics(rows){ const cs=rows.map(csatVal).filter(Boolean); return {cases:rows.length,contact:rate(rows,isContacted),closed:rate(rows,isClosed),ret:rate(rows,isReturned),sign:rate(rows,isSigned),csat:avg(cs)}; }
+function renderClub(){
+  const groups=by(filteredRows,r=>clean(r.Club)); let data=Object.entries(groups).map(([club,rows])=>({club,...clubMetrics(rows)})).filter(x=>x.cases>=5);
+  data.sort((a,b)=>b.ret-a.ret); const top=data.slice(0,10), bottom=[...data].sort((a,b)=>a.ret-b.ret).slice(0,10);
+  makeChart('clubReturnChart',{type:'bar',data:{labels:top.map(x=>x.club),datasets:[{label:'Return %',data:top.map(x=>x.ret*100),borderRadius:12}]},options:commonOptions({plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{callback:v=>v+'%'}}}})});
+  makeChart('clubBottomChart',{type:'bar',data:{labels:bottom.map(x=>x.club),datasets:[{label:'Return %',data:bottom.map(x=>x.ret*100),borderRadius:12}]},options:commonOptions({plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{callback:v=>v+'%'}}}})});
+  const table=[...data].sort((a,b)=> ((1-a.ret)*.45+(1-a.sign)*.25+(1-a.closed)*.2+(a.cases/Math.max(...data.map(x=>x.cases)))*.1) < ((1-b.ret)*.45+(1-b.sign)*.25+(1-b.closed)*.2+(b.cases/Math.max(...data.map(x=>x.cases)))*.1) ? 1:-1);
+  $('clubTable').innerHTML=table.map(x=>{ const risk=Math.min(100,Math.round((1-x.ret)*55+(1-x.sign)*25+(1-x.closed)*20)); return `<tr><td class="font-bold">${x.club}</td><td>${fmt(x.cases)}</td><td>${pct(x.contact)}</td><td>${pct(x.closed)}</td><td class="font-bold ${x.ret>=.6?'good':x.ret>=.35?'warn':'bad'}">${pct(x.ret)}</td><td>${pct(x.sign)}</td><td>${x.csat?x.csat.toFixed(2):'-'}</td><td><div class="riskbar"><span style="width:${risk}%"></span></div><div class="text-xs mt-1 text-slate-500">${risk}/100</div></td></tr>`}).join('');
 }
-function renderStaff(){const arr=agg(filteredRows.filter(isCalled),r=>r._staff).filter(a=>!isSystemStaff(a.key)).sort((a,b)=>b.returnRate-a.returnRate); $('staffTable').innerHTML='<thead><tr>'+['#','Staff Name','Role','Calls','Returned','Return Rate','PIF Cases','Contract Signed','% Sign contract','Avg ReCSAT','Performance Band'].map(th).join('')+'</tr></thead><tbody>'+arr.map((a,i)=>{const b=band(a);return `<tr>${td(i+1,'text-center')}${td(esc(a.key),'font-black text-[#0b1b46]')}${td(roleOf(a.key),'text-center')}${td(fmtInt(a.called),'text-center mono')}${td(fmtInt(a.returned),'text-center mono')}${td(fmtPct(a.returnRate),'heat '+heat(a.returnRate))}${td(fmtInt(a.pifCase),'text-center mono')}${td(fmtInt(a.pifSigned),'text-center mono')}${td(fmtPct(a.signRate),'heat '+heat(a.signRate,'sign'))}${td(a.recsat?a.recsat.toFixed(2):'0.00','text-center mono')}${td(`<span class="pill ${b[2]}">${b[0]} ${b[1]}</span>`,'text-center')}</tr>`}).join('')+'</tbody>'; small('topStaff',arr.slice(0,5)); }
-function small(id,arr){$(id).innerHTML='<thead><tr>'+['Rank','StaffName','Calls','Return%','Sign%','ReCSAT'].map(th).join('')+'</tr></thead><tbody>'+arr.map((a,i)=>`<tr>${td(i+1,'text-center font-black')}${td(esc(a.key),'font-bold')}${td(fmtInt(a.called),'text-center')}${td(fmtPct(a.returnRate),'text-center')}${td(fmtPct(a.signRate),'text-center')}${td(a.recsat?a.recsat.toFixed(2):'0.00','text-center')}</tr>`).join('')+'</tbody>'}
-function renderClub(){const arr=agg(filteredRows,r=>r._club).filter(a=>!CLOSED.has(a.key)).sort((a,b)=>b.called-a.called); const avg=arr.reduce((s,a)=>s+a.returnRate,0)/(arr.length||1); $('clubTable').innerHTML='<thead><tr>'+['No.','Club','Total Calls','Contacted','Contact %','Returned','Return %','PIF Cases','Signed','Sign %','Avg ReCSAT','Priority'].map(th).join('')+'</tr></thead><tbody>'+arr.map((a,i)=>{const p=priority(a,avg);return `<tr>${td(i+1,'text-center')}${td(a.key,'font-black text-[#0b1b46]')}${td(fmtInt(a.called),'text-center')}${td(fmtInt(a.contacted),'text-center')}${td(fmtPct(a.contactRate),'text-center')}${td(fmtInt(a.returned),'text-center')}${td(fmtPct(a.returnRate),'heat '+heat(a.returnRate))}${td(fmtInt(a.pifCase),'text-center')}${td(fmtInt(a.pifSigned),'text-center')}${td(fmtPct(a.signRate),'heat '+heat(a.signRate,'sign'))}${td(a.recsat?a.recsat.toFixed(1):'0.0','text-center')}${td(`<span class="pill ${p[2]}">${p[0]} ${p[1]}</span>`,'text-center')}</tr>`}).join('')+'</tbody>';
- $('znsTable').innerHTML='<thead><tr>'+['Club','ZNS Sendout','ZNS Respond','% ZNS Respond','Re-ZNS Sendout','Re-ZNS Respond','% Re-ZNS Respond','ZNS Cost'].map(th).join('')+'</tr></thead><tbody>'+arr.map(a=>`<tr>${td(a.key,'font-black text-[#0b1b46]')}${td(fmtInt(a.zns),'text-center')}${td(fmtInt(a.znsResp),'text-center')}${td(fmtPct(a.znsRate),'heat '+heat(a.znsRate))}${td(fmtInt(a.rezns),'text-center')}${td(fmtInt(a.reznsResp),'text-center')}${td(fmtPct(a.reznsRate),'heat '+heat(a.reznsRate))}${td(fmtInt(filteredRows.filter(r=>r._club===a.key).reduce((s,r)=>s+num(r['ZNS Cost (VND)']),0)),'text-center')}</tr>`).join('')+'</tbody>'}
-function renderTopBottom(){const clubs=agg(filteredRows,r=>r._club).filter(a=>!CLOSED.has(a.key)&&a.called>=10).sort((a,b)=>b.returnRate-a.returnRate); rankTable('topClub',clubs.slice(0,5),'✅ TOP 5 PERFORMERS','Club','ok'); rankTable('bottomClub',clubs.slice(-5).reverse(),'🚨 BOTTOM 5 — URGENT INTERVENTION','Club','bad'); const staff=agg(filteredRows.filter(isCalled),r=>r._staff).filter(a=>a.called>=10&&!isSystemStaff(a.key)).sort((a,b)=>b.returnRate-a.returnRate); rankTable('topStaff2',staff.slice(0,5),'✅ TOP 5 STAFF','Staff','ok'); rankTable('bottomStaff',staff.slice(-5).reverse(),'🚨 BOTTOM 5 STAFF','Staff','bad')}
-function rankTable(id,arr,title,label,kind){$(id).innerHTML=`<thead><tr><th colspan="6" class="${kind==='bad'?'!bg-red-600':'!bg-emerald-700'} text-left text-lg">${title}</th></tr><tr>`+['Rank',label,'Return%','Sign%','CSAT','Priority'].map(th).join('')+'</tr></thead><tbody>'+arr.map((a,i)=>`<tr>${td(i+1,'text-center font-black')}${td(esc(a.key),'font-bold')}${td(fmtPct(a.returnRate),'text-center')}${td(fmtPct(a.signRate),'text-center')}${td((a.recsat||a.csat).toFixed? (a.recsat||a.csat).toFixed(1):'0.0','text-center')}${td(kind==='bad'?'🚨 P1 CRITICAL':'✅ ON TRACK','text-center font-bold')}</tr>`).join('')+'</tbody>'}
-function renderRaw(){const q=norm($('searchBox').value).toLowerCase(); const rows=filteredRows.filter(r=>!q||Object.values(r).some(v=>norm(v).toLowerCase().includes(q))).slice(0,500); $('rowCount').textContent=`Showing ${fmtInt(rows.length)} / ${fmtInt(filteredRows.length)} rows`; const cols=['Call Assigned Date','Call Type','Contact Method','Staff Name','Club','Client Name','Phone','Returned To Train','Contract Sign Date']; $('rawTable').innerHTML='<thead><tr>'+cols.map(th).join('')+'</tr></thead><tbody>'+rows.map(r=>'<tr>'+cols.map(c=>td(esc(r[c]))).join('')+'</tr>').join('')+'</tbody>'}
-function chart(id,type,data,opts={}){if(charts[id])charts[id].destroy(); const c=$(id); if(!c)return; charts[id]=new Chart(c,{type,data,options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'}},...opts}})}
-function renderCharts(){const months=agg(filteredRows,r=>r._month).filter(a=>a.key).sort((a,b)=>a.key.localeCompare(b.key)); chart('trendChart','line',{labels:months.map(a=>ml(a.key)),datasets:[{label:'Return %',data:months.map(a=>+(a.returnRate*100).toFixed(1)),tension:.3},{label:'Sign %',data:months.map(a=>+(a.signRate*100).toFixed(1)),tension:.3},{label:'Contact %',data:months.map(a=>+(a.contactRate*100).toFixed(1)),tension:.3}]},{scales:{y:{beginAtZero:true,ticks:{callback:v=>v+'%'}}}}); const st=agg(filteredRows.filter(isCalled),r=>r._staff).filter(a=>a.called>=10&&!isSystemStaff(a.key)); chart('staffScatter','scatter',{datasets:[{label:'Staff',data:st.map(a=>({x:a.called,y:+(a.returnRate*100).toFixed(1),staff:a.key,sign:+(a.signRate*100).toFixed(1)}))}]},{plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`${c.raw.staff}: ${c.raw.x} calls, ${c.raw.y}% return, ${c.raw.sign}% sign`}}},scales:{x:{title:{display:true,text:'Calls'}},y:{beginAtZero:true,ticks:{callback:v=>v+'%'}}}}); const clubs=agg(filteredRows,r=>r._club).filter(a=>!CLOSED.has(a.key)&&a.called>=10); chart('clubRisk','scatter',{datasets:[{label:'Club',data:clubs.map(a=>({x:a.called,y:+(a.returnRate*100).toFixed(1),club:a.key,sign:+(a.signRate*100).toFixed(1)}))}]},{plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`${c.raw.club}: ${c.raw.x} calls, ${c.raw.y}% return, ${c.raw.sign}% sign`}}},scales:{x:{title:{display:true,text:'Total Calls / Workload'}},y:{beginAtZero:true,ticks:{callback:v=>v+'%'}}}})}
-function renderAll(){renderKPIs();renderOverview();renderStaff();renderClub();renderTopBottom();renderRaw();renderCharts()}
-function boot(rows,src){rawRows=clean(rows); initFilters(); apply(); $('loadStatus').textContent=`Loaded ${fmtInt(rawRows.length)} rows from ${src}`}
-async function loadCsv(){for(const u of CSV_URLS){try{const res=await fetch(u+'?v='+Date.now()); if(!res.ok)throw new Error(res.status); const text=await res.text(); const raw=Papa.parse(text,{header:false,skipEmptyLines:true}).data; const idx=raw.findIndex(r=>r.includes('Call Type')||r.includes('Call Assigned Date')); if(idx<0)throw new Error('header not found'); const header=raw[idx].map(norm); const rows=raw.slice(idx+1).map(r=>Object.fromEntries(header.map((h,i)=>[h,r[i]??'']))); boot(rows,u); return}catch(e){console.warn(e)}} $('loadStatus').textContent='Cannot load servicecall.csv. Please upload CSV.'}
-$('applyBtn').onclick=apply; $('searchBox').addEventListener('input',renderRaw); document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));b.classList.add('active');document.querySelectorAll('.tabpage').forEach(p=>p.classList.add('hidden'));$('tab-'+b.dataset.tab).classList.remove('hidden');setTimeout(renderCharts,50)}); loadCsv();
+function staffMetrics(rows){ const c=rows.length, closed=rate(rows,isClosed), ret=rate(rows,isReturned), sign=rate(rows,isSigned), days=avg(rows.map(r=>num(r['Days To Process'])).filter(x=>x>=0)); return {cases:c,closed,ret,sign,days}; }
+function scoreStaff(x,maxCases){ const vol=x.cases/(maxCases||1); return Math.round((vol*.30+x.closed*.25+x.ret*.25+x.sign*.20)*100); }
+function renderStaff(){
+  const groups=by(filteredRows,r=>clean(r['Staff Name'])); let data=Object.entries(groups).map(([staff,rows])=>({staff,club:clean(rows[0].Club),...staffMetrics(rows)})).filter(x=>x.cases>=3); const maxCases=Math.max(1,...data.map(x=>x.cases)); data.forEach(x=>x.score=scoreStaff(x,maxCases)); data.sort((a,b)=>b.score-a.score);
+  const best=data[0]||{}, highRet=[...data].sort((a,b)=>b.ret-a.ret)[0]||{}, highSign=[...data].sort((a,b)=>b.sign-a.sign)[0]||{}, low=[...data].sort((a,b)=>a.ret-b.ret)[0]||{};
+  $('staffCards').innerHTML=[kpiCard('Best Score',best.staff||'-',`${best.score||0}/100`,'good'),kpiCard('Highest Return',highRet.staff||'-',pct(highRet.ret||0),'good'),kpiCard('Highest Sign',highSign.staff||'-',pct(highSign.sign||0),'good'),kpiCard('Need Coaching',low.staff||'-',pct(low.ret||0),'bad')].join('');
+  makeChart('staffScoreChart',{type:'bar',data:{labels:data.slice(0,12).map(x=>x.staff),datasets:[{label:'Score',data:data.slice(0,12).map(x=>x.score),borderRadius:12}]},options:commonOptions({indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{beginAtZero:true,max:100}}})});
+  makeChart('staffScatterChart',{type:'scatter',data:{datasets:[{label:'Staff',data:data.map(x=>({x:x.cases,y:x.ret*100,staff:x.staff,sign:x.sign*100}))}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>`${ctx.raw.staff}: ${ctx.raw.x} cases, Return ${ctx.raw.y.toFixed(1)}%, Sign ${ctx.raw.sign.toFixed(1)}%`}}},scales:{x:{title:{display:true,text:'Cases'},beginAtZero:true},y:{title:{display:true,text:'Return %'},beginAtZero:true,ticks:{callback:v=>v+'%'}}}}});
+  $('staffTable').innerHTML=data.map(x=>`<tr><td class="font-bold">${x.staff}</td><td>${x.club}</td><td>${fmt(x.cases)}</td><td>${pct(x.closed)}</td><td class="font-bold ${x.ret>=.6?'good':x.ret>=.35?'warn':'bad'}">${pct(x.ret)}</td><td>${pct(x.sign)}</td><td>${x.days.toFixed(1)}</td><td class="font-black">${x.score}</td></tr>`).join('');
+}
+function renderCustomer(){
+  const risk=classifyRisk(filteredRows); $('riskCards').innerHTML=Object.entries(risk).map(([k,v])=>kpiCard(k,fmt(v),pct(v/(filteredRows.length||1)),k==='Healthy'?'good':k==='Warm'?'neutral':k==='Cold'?'warn':'bad')).join('');
+  const groups=by(filteredRows,r=>clean(r['Call Type'])); const data=Object.entries(groups).map(([k,rows])=>({k,before:avg(rows.map(r=>num(r['CheckIn 30D Before Call']))),after:avg(rows.map(r=>num(r['CheckIns After Call'])))})).sort((a,b)=>b.after-a.after);
+  makeChart('checkinLiftChart',{type:'bar',data:{labels:data.map(x=>x.k),datasets:[{label:'Before',data:data.map(x=>x.before),borderRadius:12},{label:'After',data:data.map(x=>x.after),borderRadius:12}]},options:commonOptions()});
+  const buckets={'0-3 days':0,'4-7 days':0,'8-14 days':0,'15-30 days':0,'30+ days':0,'No return':0}; filteredRows.forEach(r=>{const d=num(r['Days To Return']); if(!isReturned(r)) buckets['No return']++; else if(d<=3) buckets['0-3 days']++; else if(d<=7) buckets['4-7 days']++; else if(d<=14) buckets['8-14 days']++; else if(d<=30) buckets['15-30 days']++; else buckets['30+ days']++;});
+  makeChart('returnDaysChart',{type:'bar',data:{labels:Object.keys(buckets),datasets:[{label:'Cases',data:Object.values(buckets),borderRadius:12}]},options:commonOptions({plugins:{legend:{display:false}}})});
+  const sorted=[...filteredRows].sort((a,b)=>(parseDate(b['Call Assigned Date'])||0)-(parseDate(a['Call Assigned Date'])||0)).slice(0,120);
+  $('caseTable').innerHTML=sorted.map(r=>`<tr><td class="font-bold">${clean(r['Client Name'])}</td><td>${clean(r.Phone)}</td><td>${clean(r.Club)}</td><td>${clean(r['Call Type'])}</td><td>${clean(r['Stage Status'])}</td><td>${fmt(num(r['CheckIn 30D Before Call']))}</td><td>${fmt(num(r['CheckIns After Call']))}</td><td>${isReturned(r)?'✅':'—'}</td><td>${isSigned(r)?'✅':'—'}</td></tr>`).join('');
+}
+function renderRoot(){
+  const groups=by(filteredRows,r=>clean(r['Tag Complaint'])||'No Tag'); const data=Object.entries(groups).map(([tag,rows])=>{const clubs=Object.entries(by(rows,r=>clean(r.Club))).sort((a,b)=>b[1].length-a[1].length).slice(0,3).map(x=>`${x[0]} (${x[1].length})`).join(', '); const cs=rows.map(csatVal).filter(Boolean); return {tag,cases:rows.length,ret:rate(rows,isReturned),sign:rate(rows,isSigned),csat:avg(cs),clubs};}).sort((a,b)=>b.cases-a.cases);
+  makeChart('complaintChart',{type:'bar',data:{labels:data.slice(0,10).map(x=>x.tag),datasets:[{label:'Cases',data:data.slice(0,10).map(x=>x.cases),borderRadius:12}]},options:commonOptions({indexAxis:'y',plugins:{legend:{display:false}}})});
+  const dist={'1':0,'2':0,'3':0,'4':0,'5':0,'No Score':0}; filteredRows.forEach(r=>{const c=csatVal(r); if(!c) dist['No Score']++; else dist[String(Math.round(c))]=(dist[String(Math.round(c))]||0)+1;});
+  makeChart('csatChart',{type:'bar',data:{labels:Object.keys(dist),datasets:[{label:'Cases',data:Object.values(dist),borderRadius:12}]},options:commonOptions({plugins:{legend:{display:false}}})});
+  $('rootTable').innerHTML=data.map(x=>`<tr><td class="font-bold">${x.tag}</td><td>${fmt(x.cases)}</td><td>${pct(x.ret)}</td><td>${pct(x.sign)}</td><td>${x.csat?x.csat.toFixed(2):'-'}</td><td>${x.clubs}</td></tr>`).join('');
+}
+function renderAll(){ renderKPIs(); renderOverview(); renderClub(); renderStaff(); renderCustomer(); renderRoot(); }
+function loadCSVText(text, source='CSV'){
+  Papa.parse(text,{header:true,skipEmptyLines:true,complete:(res)=>{ rawRows=res.data.filter(r=>Object.keys(r).length>3); initFilters(); applyFilters(); $('loadStatus').textContent=`Loaded ${fmt(rawRows.length)} rows from ${source}`; }});
+}
+async function loadDefault(){
+  for(const p of csvPaths){ try{ const res=await fetch(p,{cache:'no-store'}); if(res.ok){ loadCSVText(await res.text(),p); return; } }catch(e){} }
+  $('loadStatus').textContent='Upload servicecall.csv to load data';
+}
+['periodFilter','clubFilter','typeFilter','staffFilter','statusFilter'].forEach(id=>$(id).addEventListener('change',applyFilters));
+$('searchInput').addEventListener('input',applyFilters);
+$('fileInput').addEventListener('change',e=>{ const f=e.target.files[0]; if(!f) return; const rd=new FileReader(); rd.onload=()=>loadCSVText(rd.result,f.name); rd.readAsText(f); });
+$('resetBtn').addEventListener('click',()=>{ ['periodFilter','clubFilter','typeFilter','staffFilter','statusFilter'].forEach(id=>$(id).value=''); $('searchInput').value=''; applyFilters(); });
+document.querySelectorAll('.tab').forEach(btn=>btn.addEventListener('click',()=>{ document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); document.querySelectorAll('.tabpane').forEach(p=>p.classList.add('hidden')); $(btn.dataset.tab).classList.remove('hidden'); setTimeout(()=>Object.values(charts).forEach(c=>c.resize()),50); }));
+loadDefault();
 </script>
 </body>
 </html>
