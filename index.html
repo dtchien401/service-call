@@ -104,7 +104,15 @@ function agg(rows,keyFn){const m=new Map(); rows.forEach(r=>{const k=keyFn(r); i
 function finish(a){a.znsRate=a.zns?a.znsResp/a.zns:0; a.contactRate=a.called?a.contacted/a.called:0; a.reznsRate=a.rezns?a.reznsResp/a.rezns:0; a.returnRate=a.called?a.returned/a.called:0; a.signRate=a.pifCase?a.pifSigned/a.pifCase:0; a.csat=a.csatN?a.csatS/a.csatN:0; a.recsat=a.recsatN?a.recsatS/a.recsatN:0; a.score=a.returnRate*.45+a.signRate*.30+(Math.min(a.recsat,5)/5)*.25; return a}
 function heat(v,t='ret'){if(t==='sign'){if(v>=.4)return'g5';if(v>=.3)return'g4';if(v>=.2)return'g3';if(v>=.1)return'g2';return'g1'} if(v>=.65)return'g5'; if(v>=.55)return'g4'; if(v>=.40)return'g3'; if(v>=.25)return'g2'; return'g1'}
 function th(x){return `<th>${x}</th>`} function td(x,c=''){return `<td class="${c}">${x}</td>`} function esc(s){return norm(s).replace(/[&<>'"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[m]))}
-function band(a){if(a.called<10)return ['⚫','No Data','neutral']; if(a.returnRate>=.68&&a.recsat>=4.8)return ['⭐','TOP PERFORMER','ok']; if(a.returnRate>=.55)return ['✅','GOOD','ok']; if(a.returnRate>=.45)return ['🟡','WATCH','warn']; return ['🔴','NEEDS COACHING','bad']}
+function band(a){
+  // Performance Band is based ONLY on Return Rate
+  // >=70%: Top Performer | >=60%: Good | >=50%: Watch | <50%: Needs Coaching
+  if(a.called<10)return ['⚫','No Data','neutral'];
+  if(a.returnRate>=.70)return ['⭐','TOP PERFORMER','ok'];
+  if(a.returnRate>=.60)return ['✅','GOOD','ok'];
+  if(a.returnRate>=.50)return ['🟡','WATCH','warn'];
+  return ['🔴','NEEDS COACHING','bad'];
+}
 function priority(a,avg){if(a.returnRate<avg*.85)return ['🚨','P1 CRITICAL','bad']; if(a.returnRate<avg*.95)return ['🔴','BELOW TARGET','warn']; return ['✅','ON TRACK','ok']}
 function apply(){const fd=$('fromDate').value?new Date($('fromDate').value):null; const tdv=$('toDate').value?new Date($('toDate').value):null; if(tdv)tdv.setHours(23,59,59,999); const club=$('clubFilter').value,type=$('typeFilter').value,staff=$('staffFilter').value; filteredRows=rawRows.filter(r=>(!fd||r._date>=fd)&&(!tdv||r._date<=tdv)&&(club==='ALL'||r._club===club)&&(type==='ALL'||r._type===type)&&(staff==='ALL'||r._staff===staff)); renderAll()}
 function initFilters(){const ds=rawRows.map(r=>r._date).filter(Boolean).sort((a,b)=>a-b); if(ds.length){$('fromDate').value=ds[0].toISOString().slice(0,10); $('toDate').value=ds[ds.length-1].toISOString().slice(0,10)} fill('clubFilter',[...new Set(rawRows.map(r=>r._club).filter(x=>x&&!CLOSED.has(x)))].sort()); fill('typeFilter',[...new Set(rawRows.map(r=>r._type).filter(Boolean))].sort()); fill('staffFilter',[...new Set(rawRows.map(r=>r._staff).filter(Boolean))].sort())} function fill(id,vals){$(id).innerHTML='<option value="ALL">All</option>'+vals.map(v=>`<option>${esc(v)}</option>`).join('')}
