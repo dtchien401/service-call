@@ -19,6 +19,8 @@
     .card{background:#fff;border:1px solid #e9edf3;border-radius:22px;box-shadow:0 10px 30px rgba(15,23,42,.06)}.kpi{background:linear-gradient(180deg,#fff,#fbfcff);border:1px solid #e9edf3;border-radius:22px;box-shadow:0 10px 24px rgba(15,23,42,.05)}
     .tab.active{background:linear-gradient(135deg,#ef302d,#d71920);color:white;box-shadow:0 10px 24px rgba(215,25,32,.32);border-color:rgba(255,255,255,.1)}.tab{transition:.2s;text-align:left;width:100%;display:flex;align-items:center;gap:.75rem;border:1px solid transparent;color:#cbd5e1}.tab:not(.active):hover{background:rgba(255,255,255,.08);color:#fff}.tab span{font-size:18px}.menu-label{font-size:10px;text-transform:uppercase;letter-spacing:.16em;font-weight:900;color:#64748b;margin:24px 10px 12px}.side-note{position:absolute;left:18px;right:18px;bottom:22px;border:1px solid rgba(148,163,184,.18);background:rgba(255,255,255,.06);border-radius:20px;padding:16px;color:#cbd5e1}.good{color:#16a34a}.warn{color:#d97706}.bad{color:#dc2626}.neutral{color:#64748b}
     .chartbox{position:relative;height:330px}.chartbox-sm{position:relative;height:270px}.chartbox-lg{position:relative;height:390px}table{border-collapse:separate;border-spacing:0} th{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:#64748b;background:#f8fafc;position:sticky;top:0}td,th{padding:12px 14px;border-bottom:1px solid #eef2f7}tr:hover td{background:#fcfcfd}.riskbar{height:8px;border-radius:99px;background:#e5e7eb;overflow:hidden}.riskbar>span{display:block;height:100%;background:var(--cali)}
+
+    .funnel-row{display:grid;grid-template-columns:110px 1fr 78px;align-items:center;gap:12px;margin:11px 0}.funnel-label{font-size:13px;font-weight:800;color:#334155}.funnel-track{height:30px;background:#f1f5f9;border-radius:999px;overflow:hidden;position:relative}.funnel-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,#ef4444,#d71920);box-shadow:inset 0 0 0 1px rgba(255,255,255,.25)}.funnel-val{text-align:right;font-size:13px;font-weight:900;color:#0f172a}.mini-health{border:1px solid #e5e7eb;border-radius:18px;padding:14px;text-align:center;background:linear-gradient(180deg,#fff,#fafafa)}.mini-health .label{font-size:12px;font-weight:900}.mini-health .value{font-size:24px;font-weight:950;margin-top:4px}.mini-health .share{font-size:12px;font-weight:800;margin-top:2px}.overview-table th,.overview-table td{padding:10px 12px}.overview-table th{font-size:10px}.action-btn{display:inline-flex;align-items:center;justify-content:center;border-radius:12px;background:linear-gradient(135deg,#ef302d,#d71920);color:white;font-weight:900;font-size:13px;padding:10px 22px;box-shadow:0 10px 22px rgba(215,25,32,.25)}
     @media(max-width:1200px){.app{grid-template-columns:1fr}.sidebar{position:relative;height:auto}.side-note{display:none}.topbar{flex-direction:column}.filters{grid-template-columns:repeat(2,minmax(0,1fr));width:100%}.content{padding:18px}.chartbox,.chartbox-sm,.chartbox-lg{height:300px}.desktop-table{min-width:900px}.tabs-wrap{display:flex;overflow-x:auto}.tab{white-space:nowrap;min-width:210px}}
 
   </style>
@@ -64,13 +66,45 @@
     </div>
 <section id="overview" class="tabpane">
         <div id="kpiGrid" class="grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-8 gap-3 mb-5"></div>
-        <div class="grid grid-cols-1 xl:grid-cols-2 gap-5 mb-5">
-          <div class="card p-5"><h3 class="font-extrabold text-lg">Service Impact Funnel</h3><p class="text-sm text-slate-500 mb-3">Assigned → Contacted → Closed → Returned → Signed</p><div class="chartbox"><canvas id="funnelChart"></canvas></div></div>
-          <div class="card p-5"><h3 class="font-extrabold text-lg">Cases by Call Type</h3><p class="text-sm text-slate-500 mb-3">Volume mix of service reasons</p><div class="chartbox"><canvas id="typeChart"></canvas></div></div>
+
+        <div class="grid grid-cols-1 xl:grid-cols-12 gap-5 mb-5">
+          <div class="card p-5 xl:col-span-5">
+            <div class="flex items-start justify-between gap-3 mb-2">
+              <div><h3 class="font-extrabold text-lg">Customer Service Impact Funnel</h3><p class="text-sm text-slate-500">Assigned → Contacted → Closed → Returned → Signed</p></div>
+              <div class="text-xs font-black text-slate-400 uppercase tracking-widest">Impact</div>
+            </div>
+            <div id="impactFunnel" class="mt-4"></div>
+            <div id="funnelConversion" class="mt-4 text-center text-sm font-extrabold bg-red-50 text-red-700 rounded-2xl py-3"></div>
+          </div>
+          <div class="card p-5 xl:col-span-3">
+            <h3 class="font-extrabold text-lg">Cases by Call Type</h3>
+            <p class="text-sm text-slate-500 mb-3">Volume mix of service reasons</p>
+            <div class="chartbox"><canvas id="typeChart"></canvas></div>
+          </div>
+          <div class="card p-5 xl:col-span-4">
+            <h3 class="font-extrabold text-lg">Trend Over Time</h3>
+            <p class="text-sm text-slate-500 mb-3">Closed, Returned and Signed cases</p>
+            <div class="chartbox"><canvas id="trendChart"></canvas></div>
+          </div>
         </div>
-        <div class="grid grid-cols-1 xl:grid-cols-3 gap-5">
-          <div class="card p-5 xl:col-span-2"><h3 class="font-extrabold text-lg">Monthly Trend</h3><p class="text-sm text-slate-500 mb-3">Cases, Return Rate and Sign Rate by EOM</p><div class="chartbox-lg"><canvas id="trendChart"></canvas></div></div>
-          <div class="card p-5"><h3 class="font-extrabold text-lg">Risk Mix</h3><p class="text-sm text-slate-500 mb-3">Customer status after service call</p><div class="chartbox-lg"><canvas id="riskPie"></canvas></div></div>
+
+        <div class="grid grid-cols-1 xl:grid-cols-12 gap-5">
+          <div class="card p-5 xl:col-span-4">
+            <h3 class="font-extrabold text-lg mb-3">Top Clubs Performance</h3>
+            <div class="overflow-auto"><table class="w-full overview-table"><thead><tr><th>Club</th><th>Cases</th><th>Return %</th><th>Sign %</th><th>CSAT</th><th>Risk</th></tr></thead><tbody id="overviewClubTable"></tbody></table></div>
+            <div class="text-center mt-4"><button class="action-btn" onclick="goTab('club')">View all clubs</button></div>
+          </div>
+          <div class="card p-5 xl:col-span-4">
+            <h3 class="font-extrabold text-lg mb-3">Staff Performance <span class="text-sm text-slate-400">(Top 5 by Score)</span></h3>
+            <div class="overflow-auto"><table class="w-full overview-table"><thead><tr><th>Staff</th><th>Cases</th><th>Closed</th><th>Return %</th><th>Sign %</th><th>Score</th></tr></thead><tbody id="overviewStaffTable"></tbody></table></div>
+            <div class="text-center mt-4"><button class="action-btn" onclick="goTab('staff')">View all staff</button></div>
+          </div>
+          <div class="card p-5 xl:col-span-4">
+            <h3 class="font-extrabold text-lg">Customer Health Overview</h3>
+            <div id="overviewRiskCards" class="grid grid-cols-2 lg:grid-cols-4 gap-3 mt-3 mb-4"></div>
+            <h4 class="font-extrabold text-sm text-slate-700">Customer Aging <span class="font-medium text-slate-400">(based on check-ins after call)</span></h4>
+            <div class="chartbox-sm"><canvas id="overviewAgingChart"></canvas></div>
+          </div>
         </div>
       </section>
 
@@ -176,15 +210,37 @@ function renderKPIs(){
 }
 function renderOverview(){
   const r=filteredRows;
-  const funnel=[['Assigned',r.length],['Contacted',r.filter(isContacted).length],['Closed',r.filter(isClosed).length],['Returned',r.filter(isReturned).length],['Signed',r.filter(isSigned).length]];
-  makeChart('funnelChart',{type:'bar',data:{labels:funnel.map(x=>x[0]),datasets:[{label:'Cases',data:funnel.map(x=>x[1]),borderRadius:12}]},options:commonOptions({plugins:{legend:{display:false}}})});
-  const types=topEntries(by(r,x=>clean(x['Call Type'])), rows=>({value:rows.length}), 8);
-  makeChart('typeChart',{type:'doughnut',data:{labels:types.map(x=>x.k),datasets:[{data:types.map(x=>x.value)}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'}}}});
+  const assigned=r.length, contacted=r.filter(isContacted).length, closed=r.filter(isClosed).length, returned=r.filter(isReturned).length, signed=r.filter(isSigned).length;
+  const funnel=[['Assigned',assigned],['Contacted',contacted],['Closed',closed],['Returned To Train',returned],['Signed',signed]];
+  const max=Math.max(1,assigned);
+  $('impactFunnel').innerHTML=funnel.map(([label,val])=>`<div class="funnel-row"><div class="funnel-label">${label}</div><div class="funnel-track"><div class="funnel-fill" style="width:${Math.max(3,val/max*100)}%"></div></div><div class="funnel-val">${fmt(val)}</div></div>`).join('');
+  $('funnelConversion').textContent=`Conversion from Assigned to Signed: ${pct(signed/(assigned||1))}`;
+
+  const types=topEntries(by(r,x=>clean(x['Call Type'])), rows=>({value:rows.length}), 6);
+  makeChart('typeChart',{type:'doughnut',data:{labels:types.map(x=>x.k),datasets:[{data:types.map(x=>x.value),borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,cutout:'58%',plugins:{legend:{position:'right',labels:{boxWidth:10,font:{weight:'700'}}},tooltip:{callbacks:{label:ctx=>`${ctx.label}: ${fmt(ctx.raw)} (${pct(ctx.raw/(r.length||1))})`}}}}});
+
   const months=Object.entries(by(r,x=>monthKey(x.EOM))).sort(([a],[b])=>a.localeCompare(b));
-  makeChart('trendChart',{type:'line',data:{labels:months.map(x=>x[0]),datasets:[{label:'Cases',data:months.map(x=>x[1].length),yAxisID:'y',tension:.35},{label:'Return %',data:months.map(x=>rate(x[1],isReturned)*100),yAxisID:'y1',tension:.35},{label:'Sign %',data:months.map(x=>rate(x[1],isSigned)*100),yAxisID:'y1',tension:.35}]},options:commonOptions({scales:{x:{grid:{display:false}},y:{beginAtZero:true,position:'left'},y1:{beginAtZero:true,position:'right',grid:{drawOnChartArea:false},ticks:{callback:v=>v+'%'}}}})});
-  const risk = classifyRisk(r);
-  makeChart('riskPie',{type:'pie',data:{labels:Object.keys(risk),datasets:[{data:Object.values(risk)}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'}}}});
+  makeChart('trendChart',{type:'line',data:{labels:months.map(x=>x[0]),datasets:[{label:'Closed Cases',data:months.map(x=>x[1].filter(isClosed).length),tension:.35,borderWidth:3,pointRadius:3},{label:'Returned To Train',data:months.map(x=>x[1].filter(isReturned).length),tension:.35,borderWidth:3,pointRadius:3},{label:'Signed',data:months.map(x=>x[1].filter(isSigned).length),tension:.35,borderWidth:3,pointRadius:3}]},options:commonOptions({plugins:{legend:{display:true,position:'top'}},scales:{x:{grid:{display:false}},y:{beginAtZero:true,grid:{color:'#eef2f7'}}}})});
+
+  renderOverviewTables(r);
 }
+function renderOverviewTables(r){
+  const clubGroups=by(r,x=>clean(x.Club));
+  let clubs=Object.entries(clubGroups).map(([club,rows])=>({club,...clubMetrics(rows)})).filter(x=>x.cases>=5);
+  clubs.sort((a,b)=>(b.ret*50+b.sign*30+(b.csat||0)*4) - (a.ret*50+a.sign*30+(a.csat||0)*4));
+  $('overviewClubTable').innerHTML=clubs.slice(0,5).map(x=>{const risk=Math.min(100,Math.round((1-x.ret)*55+(1-x.sign)*25+(1-x.closed)*20)); const dot=risk<35?'🟢':risk<60?'🟡':risk<80?'🟠':'🔴'; return `<tr><td class="font-bold">${x.club}</td><td>${fmt(x.cases)}</td><td class="font-bold ${x.ret>=.6?'good':x.ret>=.35?'warn':'bad'}">${pct(x.ret)}</td><td>${pct(x.sign)}</td><td>${x.csat?x.csat.toFixed(2):'-'}</td><td>${dot}</td></tr>`}).join('');
+
+  const staffGroups=by(r,x=>clean(x['Staff Name']));
+  let staff=Object.entries(staffGroups).map(([staff,rows])=>({staff,...staffMetrics(rows)})).filter(x=>x.cases>=3);
+  const maxCases=Math.max(1,...staff.map(x=>x.cases)); staff.forEach(x=>x.score=scoreStaff(x,maxCases)); staff.sort((a,b)=>b.score-a.score);
+  $('overviewStaffTable').innerHTML=staff.slice(0,5).map(x=>`<tr><td class="font-bold">${x.staff}</td><td>${fmt(x.cases)}</td><td>${fmt(Math.round(x.closed*x.cases))}</td><td class="font-bold ${x.ret>=.6?'good':x.ret>=.35?'warn':'bad'}">${pct(x.ret)}</td><td>${pct(x.sign)}</td><td class="font-black">${x.score}</td></tr>`).join('');
+
+  const risk=classifyRisk(r); const total=r.length||1;
+  const meta={Healthy:['good','0 - 7 days'],Warm:['warn','8 - 14 days'],Cold:['warn','15 - 30 days'],Lost:['bad','30+ days']};
+  $('overviewRiskCards').innerHTML=Object.entries(risk).map(([k,v])=>`<div class="mini-health"><div class="label ${meta[k][0]}">${k}</div><div class="value">${fmt(v)}</div><div class="share ${meta[k][0]}">${pct(v/total)}</div></div>`).join('');
+  makeChart('overviewAgingChart',{type:'bar',data:{labels:['0 - 7 days','8 - 14 days','15 - 30 days','30+ days'],datasets:[{label:'Customers',data:[risk.Healthy,risk.Warm,risk.Cold,risk.Lost],borderRadius:12}]},options:commonOptions({plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{beginAtZero:true,grid:{color:'#eef2f7'}}}})});
+}
+function goTab(tab){ const btn=document.querySelector(`.tab[data-tab="${tab}"]`); if(btn) btn.click(); }
 function classifyRisk(rows){ const out={Healthy:0,Warm:0,Cold:0,Lost:0}; rows.forEach(r=>{ const after=num(r['CheckIns After Call']); if(after>=8) out.Healthy++; else if(after>=4) out.Warm++; else if(after>=1) out.Cold++; else out.Lost++; }); return out; }
 function clubMetrics(rows){ const cs=rows.map(csatVal).filter(Boolean); return {cases:rows.length,contact:rate(rows,isContacted),closed:rate(rows,isClosed),ret:rate(rows,isReturned),sign:rate(rows,isSigned),csat:avg(cs)}; }
 function renderClub(){
