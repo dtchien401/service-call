@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cali Service Recovery Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root { --cali-red:#d71920; --ink:#111827; --muted:#6b7280; --soft:#f5f6f8; }
+    * { box-sizing:border-box; }
+    body { font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background:#f3f4f6; color:var(--ink); }
+    .card { background:white; border:1px solid #e5e7eb; border-radius:22px; box-shadow:0 12px 34px rgba(15,23,42,.06); }
+    .kpi-card { background:linear-gradient(180deg,#fff,#fafafa); border:1px solid #e5e7eb; border-radius:22px; box-shadow:0 12px 30px rgba(15,23,42,.05); }
+    .tab-btn.active { background:#111827; color:white; }
+    .filter { border:1px solid #e5e7eb; border-radius:14px; padding:10px 12px; background:white; outline:none; min-height:42px; }
+    .filter:focus { border-color:#d71920; box-shadow:0 0 0 3px rgba(215,25,32,.12); }
+    .chart-box { position:relative; height:320px; }
+    .chart-box.tall { height:430px; }
+    .small-label { font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:#6b7280; font-weight:800; }
+    .pill { border-radius:999px; padding:6px 10px; font-size:12px; font-weight:700; }
+    .table-wrap { max-height:470px; overflow:auto; }
+    table { width:100%; border-collapse:separate; border-spacing:0; }
+    th { position:sticky; top:0; background:#f9fafb; z-index:1; font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:#6b7280; padding:12px; text-align:left; border-bottom:1px solid #e5e7eb; }
+    td { padding:12px; border-bottom:1px solid #f1f5f9; font-size:13px; white-space:nowrap; }
+    .positive { color:#059669; font-weight:800; }
+    .negative { color:#dc2626; font-weight:800; }
+    .warn { color:#d97706; font-weight:800; }
+    @media (max-width: 768px) { .desktop-wide { min-width:1180px; } body { overflow-x:auto; } }
+  </style>
+</head>
+<body>
+  <div class="desktop-wide max-w-[1500px] mx-auto p-5 lg:p-7">
+    <header class="card p-5 mb-5 overflow-hidden relative">
+      <div class="absolute right-0 top-0 h-full w-1/3 bg-gradient-to-l from-red-50 to-transparent pointer-events-none"></div>
+      <div class="relative flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+        <div class="flex items-center gap-4">
+          <div class="h-12 w-12 rounded-2xl bg-[#d71920] text-white grid place-items-center font-black text-xl">C</div>
+          <div>
+            <div class="small-label">Customer Service • Recovery Engine</div>
+            <h1 class="text-2xl lg:text-3xl font-black tracking-tight">Service Recovery Dashboard</h1>
+            <p class="text-sm text-gray-500 mt-1">Measure call execution, member return behavior, club performance, staff productivity, and contract sign impact.</p>
+          </div>
+        </div>
+        <div class="flex flex-wrap items-center gap-2">
+          <label class="pill bg-gray-100 text-gray-700 cursor-pointer">
+            Upload CSV
+            <input id="fileInput" type="file" accept=".csv" class="hidden" />
+          </label>
+          <button id="reloadBtn" class="pill bg-red-600 text-white">Reload CSV</button>
+          <span id="dataStatus" class="pill bg-gray-100 text-gray-600">Loading...</span>
+        </div>
+      </div>
+    </header>
+
+    <section class="card p-4 mb-5">
+      <div class="grid grid-cols-2 lg:grid-cols-7 gap-3">
+        <div>
+          <label class="small-label">Date Field</label>
+          <select id="dateField" class="filter w-full mt-1">
+            <option value="Call Assigned Date">Assigned Date</option>
+            <option value="Call Closed Date">Closed Date</option>
+            <option value="First CheckIn After Call">First Check-in After</option>
+            <option value="Contract Sign Date">Contract Sign Date</option>
+            <option value="EOM">EOM</option>
+          </select>
+        </div>
+        <div>
+          <label class="small-label">From</label>
+          <input id="fromDate" type="date" class="filter w-full mt-1" />
+        </div>
+        <div>
+          <label class="small-label">To</label>
+          <input id="toDate" type="date" class="filter w-full mt-1" />
+        </div>
+        <div>
+          <label class="small-label">Club</label>
+          <select id="clubFilter" class="filter w-full mt-1"><option value="ALL">All Clubs</option></select>
+        </div>
+        <div>
+          <label class="small-label">Call Type</label>
+          <select id="callTypeFilter" class="filter w-full mt-1"><option value="ALL">All Types</option></select>
+        </div>
+        <div>
+          <label class="small-label">Staff</label>
+          <select id="staffFilter" class="filter w-full mt-1"><option value="ALL">All Staff</option></select>
+        </div>
+        <div>
+          <label class="small-label">Search</label>
+          <input id="searchBox" placeholder="Client / phone / contract" class="filter w-full mt-1" />
+        </div>
+      </div>
+    </section>
+
+    <section class="grid grid-cols-2 lg:grid-cols-6 gap-4 mb-5" id="kpiGrid"></section>
+
+    <nav class="flex flex-wrap gap-2 mb-5">
+      <button class="tab-btn active px-4 py-2 rounded-full font-bold text-sm bg-white border" data-tab="overview">Overview</button>
+      <button class="tab-btn px-4 py-2 rounded-full font-bold text-sm bg-white border" data-tab="recovery">Recovery</button>
+      <button class="tab-btn px-4 py-2 rounded-full font-bold text-sm bg-white border" data-tab="club">Club Ranking</button>
+      <button class="tab-btn px-4 py-2 rounded-full font-bold text-sm bg-white border" data-tab="staff">Staff</button>
+      <button class="tab-btn px-4 py-2 rounded-full font-bold text-sm bg-white border" data-tab="voc">VOC</button>
+      <button class="tab-btn px-4 py-2 rounded-full font-bold text-sm bg-white border" data-tab="data">Data</button>
+    </nav>
+
+    <main>
+      <section id="tab-overview" class="tab-panel grid grid-cols-1 lg:grid-cols-2 gap-5">
+        <div class="card p-5 lg:col-span-2">
+          <div class="flex items-start justify-between mb-3"><div><div class="small-label">Main Funnel</div><h2 class="text-xl font-black">Service Recovery Funnel</h2></div><div id="funnelNote" class="text-xs text-gray-500"></div></div>
+          <div class="chart-box"><canvas id="funnelChart"></canvas></div>
+        </div>
+        <div class="card p-5"><div class="small-label">Volume Mix</div><h2 class="text-xl font-black mb-3">Calls by Type</h2><div class="chart-box"><canvas id="callTypeChart"></canvas></div></div>
+        <div class="card p-5"><div class="small-label">Time Trend</div><h2 class="text-xl font-black mb-3">Daily Assigned vs Closed</h2><div class="chart-box"><canvas id="trendChart"></canvas></div></div>
+      </section>
+
+      <section id="tab-recovery" class="tab-panel hidden grid grid-cols-1 lg:grid-cols-2 gap-5">
+        <div class="card p-5"><div class="small-label">Effectiveness</div><h2 class="text-xl font-black mb-3">Return Rate by Call Type</h2><div class="chart-box"><canvas id="returnRateChart"></canvas></div></div>
+        <div class="card p-5"><div class="small-label">Speed</div><h2 class="text-xl font-black mb-3">Avg Days to Return</h2><div class="chart-box"><canvas id="daysReturnChart"></canvas></div></div>
+        <div class="card p-5 lg:col-span-2"><div class="small-label">Behavior Change</div><h2 class="text-xl font-black mb-3">Check-in Before vs After Call</h2><div class="chart-box"><canvas id="checkinLiftChart"></canvas></div></div>
+      </section>
+
+      <section id="tab-club" class="tab-panel hidden grid grid-cols-1 lg:grid-cols-2 gap-5">
+        <div class="card p-5"><div class="small-label">Top Clubs</div><h2 class="text-xl font-black mb-3">Top 10 Return Rate</h2><div class="chart-box tall"><canvas id="topClubChart"></canvas></div></div>
+        <div class="card p-5"><div class="small-label">Risk Clubs</div><h2 class="text-xl font-black mb-3">Bottom 10 Return Rate</h2><div class="chart-box tall"><canvas id="bottomClubChart"></canvas></div></div>
+        <div class="card p-5 lg:col-span-2"><div class="small-label">Ranking</div><h2 class="text-xl font-black mb-3">Club Recovery Scorecard</h2><div class="table-wrap"><table id="clubTable"></table></div></div>
+      </section>
+
+      <section id="tab-staff" class="tab-panel hidden grid grid-cols-1 lg:grid-cols-2 gap-5">
+        <div class="card p-5"><div class="small-label">Productivity</div><h2 class="text-xl font-black mb-3">Calls by Staff</h2><div class="chart-box tall"><canvas id="staffVolumeChart"></canvas></div></div>
+        <div class="card p-5"><div class="small-label">Quality</div><h2 class="text-xl font-black mb-3">Return Rate by Staff</h2><div class="chart-box tall"><canvas id="staffReturnChart"></canvas></div></div>
+        <div class="card p-5 lg:col-span-2"><div class="small-label">Quadrant</div><h2 class="text-xl font-black mb-3">Staff Volume vs Return Rate</h2><div class="chart-box"><canvas id="staffScatterChart"></canvas></div></div>
+      </section>
+
+      <section id="tab-voc" class="tab-panel hidden grid grid-cols-1 lg:grid-cols-2 gap-5">
+        <div class="card p-5"><div class="small-label">CSAT</div><h2 class="text-xl font-black mb-3">CSAT / Re-CSAT Distribution</h2><div class="chart-box"><canvas id="csatChart"></canvas></div></div>
+        <div class="card p-5"><div class="small-label">Complaint</div><h2 class="text-xl font-black mb-3">Complaint Tags</h2><div class="chart-box"><canvas id="complaintChart"></canvas></div></div>
+        <div class="card p-5 lg:col-span-2"><div class="small-label">Latest Notes</div><h2 class="text-xl font-black mb-3">Customer Notes Sample</h2><div id="notesList" class="space-y-3"></div></div>
+      </section>
+
+      <section id="tab-data" class="tab-panel hidden">
+        <div class="card p-5"><div class="flex items-center justify-between mb-3"><div><div class="small-label">Raw Data</div><h2 class="text-xl font-black">Filtered Records</h2></div><div id="recordCount" class="pill bg-gray-100 text-gray-700"></div></div><div class="table-wrap"><table id="dataTable"></table></div></div>
+      </section>
+    </main>
+  </div>
+
+<script>
+const CSV_SOURCES = [
+  './servicecall.csv',
+  './ServiceCall_Dashboard(DATA).csv',
+  'ServiceCall_Dashboard(DATA).csv'
+];
+
+const CLOSED_CLUBS = new Set(['FIN SERVE','CA360','CCC','VMC','LTC','TDY','JCQ','JVJ','CVC','SCC','PPC','TC1']);
+const REQUIRED_HEADERS = ['Call Assigned Date','Call Closed Date','Call Type','Club','Staff Name','Called','Returned To Train','Status Sign'];
+const state = { raw: [], data: [], filtered: [], charts: {}, activeTab:'overview' };
+
+const $ = id => document.getElementById(id);
+const clean = v => (v === undefined || v === null) ? '' : String(v).trim();
+const num = v => { const n = Number(String(v ?? '').replace(/,/g,'').trim()); return Number.isFinite(n) ? n : 0; };
+const pct = v => `${(v*100).toFixed(1)}%`;
+const fmt = n => Number(n || 0).toLocaleString('en-US');
+const money = n => Number(n || 0).toLocaleString('en-US', {maximumFractionDigits:0});
+
+function parseDate(v){
+  v = clean(v); if(!v) return null;
+  let d;
+  if(/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(v)){
+    const [m,day,y] = v.split('/').map(Number); d = new Date(y, m-1, day);
+  } else d = new Date(v);
+  return isNaN(d) ? null : d;
+}
+function dateKey(d){ if(!d) return ''; return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
+
+function normalizeRows(rows){
+  if(!rows || !rows.length) return [];
+  let headerIndex = rows.findIndex(r => Object.values(r).some(v => clean(v) === 'Call Assigned Date'));
+  if(headerIndex >= 0){
+    const rawRows = rows.map(r => Object.values(r));
+    const headers = rawRows[headerIndex].map(clean);
+    return rawRows.slice(headerIndex+1).map(arr => {
+      const o = {}; headers.forEach((h,i)=>{ if(h) o[h] = arr[i]; }); return o;
+    }).filter(r => Object.values(r).some(v => clean(v)));
+  }
+  return rows.filter(r => Object.values(r).some(v => clean(v)));
+}
+
+function standardize(rows){
+  return rows.map(r => {
+    const o = {...r};
+    o._assigned = parseDate(r['Call Assigned Date']);
+    o._closed = parseDate(r['Call Closed Date']);
+    o._firstReturn = parseDate(r['First CheckIn After Call']);
+    o._sign = parseDate(r['Contract Sign Date'] || r['Contract Sign Date2']);
+    o._eom = parseDate(r['EOM']);
+    o._called = num(r['Called']) > 0 || clean(r['Contact Method']).toLowerCase().includes('called');
+    o._returned = num(r['Returned To Train']) > 0;
+    o._signed = clean(r['Status Sign']).toLowerCase() === 'signed';
+    o._club = clean(r['Club']) || 'Unknown';
+    o._callType = clean(r['Call Type']) || 'Unknown';
+    o._staff = clean(r['Staff Name']) || clean(r['Staff Code']) || 'Unknown';
+    o._csat = num(r['CSAT Score']);
+    o._recsat = num(r['Re-CSAT Score']);
+    o._daysReturn = num(r['Days To Return']);
+    o._daysProcess = num(r['Days To Process']);
+    o._before = num(r['CheckIn 30D Before Call']);
+    o._after = num(r['CheckIns After Call']);
+    o._amount = num(r['Contract Amount']);
+    return o;
+  }).filter(r => r._callType !== 'Unknown' && !CLOSED_CLUBS.has(r._club));
+}
+
+function loadCsvFromUrl(){
+  $('dataStatus').textContent = 'Loading CSV...';
+  let i = 0;
+  const tryNext = () => {
+    if(i >= CSV_SOURCES.length){
+      $('dataStatus').textContent = 'CSV not found. Upload file.';
+      return;
+    }
+    const url = CSV_SOURCES[i++];
+    Papa.parse(url, {download:true, header:true, skipEmptyLines:true, encoding:'', complete: res => {
+      if(res.errors && res.errors.length && (!res.data || !res.data.length)){ tryNext(); return; }
+      const rows = normalizeRows(res.data);
+      if(!rows.length || !rows.some(r => REQUIRED_HEADERS.some(h => h in r))){ tryNext(); return; }
+      init(rows, url);
+    }, error: tryNext});
+  };
+  tryNext();
+}
+
+function loadCsvFile(file){
+  $('dataStatus').textContent = 'Reading file...';
+  Papa.parse(file, {header:true, skipEmptyLines:true, encoding:'', complete: res => init(normalizeRows(res.data), file.name)});
+}
+
+function init(rows, source){
+  state.raw = rows;
+  state.data = standardize(rows);
+  $('dataStatus').textContent = `${fmt(state.data.length)} records • ${source}`;
+  buildFilters();
+  setDefaultDates();
+  applyFilters();
+}
+
+function buildFilters(){
+  fillSelect('clubFilter', [...new Set(state.data.map(r=>r._club))].sort(), 'All Clubs');
+  fillSelect('callTypeFilter', [...new Set(state.data.map(r=>r._callType))].sort(), 'All Types');
+  fillSelect('staffFilter', [...new Set(state.data.map(r=>r._staff))].sort(), 'All Staff');
+}
+function fillSelect(id, values, label){
+  const el = $(id); el.innerHTML = `<option value="ALL">${label}</option>` + values.map(v=>`<option value="${escapeHtml(v)}">${escapeHtml(v)}</option>`).join('');
+}
+function setDefaultDates(){
+  const dates = state.data.map(r=>r._assigned).filter(Boolean).sort((a,b)=>a-b);
+  if(dates.length){ $('fromDate').value = dateKey(dates[0]); $('toDate').value = dateKey(dates[dates.length-1]); }
+}
+function getSelectedDate(r){
+  const f = $('dateField').value;
+  if(f === 'Call Closed Date') return r._closed;
+  if(f === 'First CheckIn After Call') return r._firstReturn;
+  if(f === 'Contract Sign Date') return r._sign;
+  if(f === 'EOM') return r._eom;
+  return r._assigned;
+}
+function applyFilters(){
+  const from = $('fromDate').value ? new Date($('fromDate').value+'T00:00:00') : null;
+  const to = $('toDate').value ? new Date($('toDate').value+'T23:59:59') : null;
+  const club = $('clubFilter').value, type = $('callTypeFilter').value, staff = $('staffFilter').value;
+  const q = clean($('searchBox').value).toLowerCase();
+  state.filtered = state.data.filter(r => {
+    const d = getSelectedDate(r);
+    if(from && (!d || d < from)) return false;
+    if(to && (!d || d > to)) return false;
+    if(club !== 'ALL' && r._club !== club) return false;
+    if(type !== 'ALL' && r._callType !== type) return false;
+    if(staff !== 'ALL' && r._staff !== staff) return false;
+    if(q){
+      const hay = [r['Client Name'], r['Phone'], r['Contract Number'], r['Client ID'], r['vtv_servicecallId']].map(clean).join(' ').toLowerCase();
+      if(!hay.includes(q)) return false;
+    }
+    return true;
+  });
+  renderAll();
+}
+
+function summarize(rows){
+  const total = rows.length;
+  const called = rows.filter(r=>r._called).length;
+  const returned = rows.filter(r=>r._returned).length;
+  const signed = rows.filter(r=>r._signed).length;
+  const recsatVals = rows.map(r=>r._recsat || r._csat).filter(v=>v>0);
+  const daysVals = rows.filter(r=>r._returned && r._daysReturn >= 0).map(r=>r._daysReturn);
+  const amount = rows.filter(r=>r._signed).reduce((s,r)=>s+r._amount,0);
+  return {total, called, returned, signed, contactRate: total?called/total:0, returnRate: total?returned/total:0, signRate: total?signed/total:0, avgCsat: avg(recsatVals), avgDays: avg(daysVals), amount};
+}
+function avg(a){ return a.length ? a.reduce((s,x)=>s+x,0)/a.length : 0; }
+function groupBy(rows, keyFn){ const m = new Map(); rows.forEach(r=>{ const k=keyFn(r); if(!m.has(k)) m.set(k,[]); m.get(k).push(r); }); return m; }
+
+function renderKpis(){
+  const s = summarize(state.filtered);
+  const kpis = [
+    ['Total Calls', fmt(s.total), 'Service call records'],
+    ['Contact Rate', pct(s.contactRate), `${fmt(s.called)} called`],
+    ['Return Rate', pct(s.returnRate), `${fmt(s.returned)} returned to train`],
+    ['Sign Rate', pct(s.signRate), `${fmt(s.signed)} signed`],
+    ['Avg Re-CSAT', s.avgCsat ? s.avgCsat.toFixed(2) : '-', 'CSAT / Re-CSAT score'],
+    ['Signed Amount', money(s.amount), 'Contract amount, signed only']
+  ];
+  $('kpiGrid').innerHTML = kpis.map(([label,value,sub])=>`
+    <div class="kpi-card p-4">
+      <div class="small-label">${label}</div>
+      <div class="text-2xl lg:text-3xl font-black mt-2">${value}</div>
+      <div class="text-xs text-gray-500 mt-1">${sub}</div>
+    </div>`).join('');
+}
+
+function renderAll(){
+  renderKpis();
+  renderOverview(); renderRecovery(); renderClub(); renderStaff(); renderVOC(); renderData();
+}
+
+function renderOverview(){
+  const s = summarize(state.filtered);
+  $('funnelNote').textContent = `Base: ${fmt(s.total)} records`;
+  chart('funnelChart','bar',{
+    labels:['Assigned','Called','Returned','Signed'],
+    datasets:[{label:'Members', data:[s.total,s.called,s.returned,s.signed], borderRadius:14}]
+  }, {plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true}}});
+
+  const typeRows = [...groupBy(state.filtered, r=>r._callType)].map(([k,v])=>({k, count:v.length})).sort((a,b)=>b.count-a.count);
+  chart('callTypeChart','bar',{labels:typeRows.map(x=>x.k), datasets:[{label:'Calls', data:typeRows.map(x=>x.count), borderRadius:12}]},{indexAxis:'y', plugins:{legend:{display:false}}, scales:{x:{beginAtZero:true}}});
+
+  const assigned = groupBy(state.filtered.filter(r=>r._assigned), r=>dateKey(r._assigned));
+  const closed = groupBy(state.filtered.filter(r=>r._closed), r=>dateKey(r._closed));
+  const labels = [...new Set([...assigned.keys(), ...closed.keys()])].sort();
+  chart('trendChart','line',{labels, datasets:[
+    {label:'Assigned', data:labels.map(k=>assigned.get(k)?.length||0), tension:.3},
+    {label:'Closed', data:labels.map(k=>closed.get(k)?.length||0), tension:.3}
+  ]},{scales:{y:{beginAtZero:true}}});
+}
+
+function renderRecovery(){
+  const byType = [...groupBy(state.filtered, r=>r._callType)].map(([k,v])=>({k, s:summarize(v), before:avg(v.map(r=>r._before).filter(x=>x>=0)), after:avg(v.map(r=>r._after).filter(x=>x>=0))})).sort((a,b)=>b.s.returnRate-a.s.returnRate);
+  chart('returnRateChart','bar',{labels:byType.map(x=>x.k), datasets:[{label:'Return Rate', data:byType.map(x=>+(x.s.returnRate*100).toFixed(1)), borderRadius:12}]},{plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true, ticks:{callback:v=>v+'%'}}}});
+  chart('daysReturnChart','bar',{labels:byType.map(x=>x.k), datasets:[{label:'Avg Days', data:byType.map(x=>+x.s.avgDays.toFixed(1)), borderRadius:12}]},{plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true}}});
+  chart('checkinLiftChart','bar',{labels:byType.map(x=>x.k), datasets:[
+    {label:'Before Call', data:byType.map(x=>+x.before.toFixed(1)), borderRadius:12},
+    {label:'After Call', data:byType.map(x=>+x.after.toFixed(1)), borderRadius:12}
+  ]},{scales:{y:{beginAtZero:true}}});
+}
+
+function clubStats(){
+  return [...groupBy(state.filtered, r=>r._club)].map(([club, rows])=>{
+    const s = summarize(rows);
+    const score = (s.returnRate*.35 + s.signRate*.30 + Math.min(s.avgCsat/5,1)*.20 + (s.avgDays ? Math.max(0,1-Math.min(s.avgDays,30)/30) : 0)*.15) * 100;
+    return {club, rows, ...s, score};
+  }).filter(x=>x.total >= 10).sort((a,b)=>b.score-a.score);
+}
+function renderClub(){
+  const stats = clubStats();
+  const byReturn = [...stats].sort((a,b)=>b.returnRate-a.returnRate);
+  const top = byReturn.slice(0,10), bottom = byReturn.slice(-10).reverse();
+  chart('topClubChart','bar',{labels:top.map(x=>x.club), datasets:[{label:'Return Rate %', data:top.map(x=>+(x.returnRate*100).toFixed(1)), borderRadius:12}]},{indexAxis:'y', plugins:{legend:{display:false}}, scales:{x:{beginAtZero:true,ticks:{callback:v=>v+'%'}}}});
+  chart('bottomClubChart','bar',{labels:bottom.map(x=>x.club), datasets:[{label:'Return Rate %', data:bottom.map(x=>+(x.returnRate*100).toFixed(1)), borderRadius:12}]},{indexAxis:'y', plugins:{legend:{display:false}}, scales:{x:{beginAtZero:true,ticks:{callback:v=>v+'%'}}}});
+  $('clubTable').innerHTML = `<thead><tr><th>Rank</th><th>Club</th><th>Calls</th><th>Contact</th><th>Return</th><th>Sign</th><th>Avg CSAT</th><th>Avg Days</th><th>Score</th></tr></thead><tbody>` + stats.map((x,i)=>`
+    <tr><td>${i+1}</td><td class="font-bold">${escapeHtml(x.club)}</td><td>${fmt(x.total)}</td><td>${pct(x.contactRate)}</td><td class="positive">${pct(x.returnRate)}</td><td>${pct(x.signRate)}</td><td>${x.avgCsat?x.avgCsat.toFixed(2):'-'}</td><td>${x.avgDays?x.avgDays.toFixed(1):'-'}</td><td class="font-black">${x.score.toFixed(1)}</td></tr>`).join('') + `</tbody>`;
+}
+
+function renderStaff(){
+  const stats = [...groupBy(state.filtered, r=>r._staff)].map(([staff, rows])=>({staff, ...summarize(rows)})).filter(x=>x.total>=10);
+  const vol = [...stats].sort((a,b)=>b.total-a.total).slice(0,15);
+  const ret = [...stats].sort((a,b)=>b.returnRate-a.returnRate).slice(0,15);
+  chart('staffVolumeChart','bar',{labels:vol.map(x=>x.staff), datasets:[{label:'Calls', data:vol.map(x=>x.total), borderRadius:12}]},{indexAxis:'y', plugins:{legend:{display:false}}, scales:{x:{beginAtZero:true}}});
+  chart('staffReturnChart','bar',{labels:ret.map(x=>x.staff), datasets:[{label:'Return Rate %', data:ret.map(x=>+(x.returnRate*100).toFixed(1)), borderRadius:12}]},{indexAxis:'y', plugins:{legend:{display:false}}, scales:{x:{beginAtZero:true,ticks:{callback:v=>v+'%'}}}});
+  chart('staffScatterChart','scatter',{datasets:[{label:'Staff', data:stats.map(x=>({x:x.total, y:+(x.returnRate*100).toFixed(1), staff:x.staff}))}]},{plugins:{tooltip:{callbacks:{label:c=>`${c.raw.staff}: ${c.raw.x} calls, ${c.raw.y}% return`}}}, scales:{x:{title:{display:true,text:'Call Volume'}, beginAtZero:true}, y:{title:{display:true,text:'Return Rate %'}, beginAtZero:true}}});
+}
+
+function renderVOC(){
+  const csatVals = [1,2,3,4,5].map(score => ({score, csat:state.filtered.filter(r=>r._csat===score).length, recsat:state.filtered.filter(r=>r._recsat===score).length}));
+  chart('csatChart','bar',{labels:csatVals.map(x=>String(x.score)), datasets:[{label:'CSAT', data:csatVals.map(x=>x.csat), borderRadius:12},{label:'Re-CSAT', data:csatVals.map(x=>x.recsat), borderRadius:12}]},{scales:{y:{beginAtZero:true}}});
+  const tags = [...groupBy(state.filtered.filter(r=>clean(r['Tag Complaint'])), r=>clean(r['Tag Complaint']))].map(([k,v])=>({k,count:v.length})).sort((a,b)=>b.count-a.count).slice(0,12);
+  chart('complaintChart','bar',{labels:tags.map(x=>x.k), datasets:[{label:'Count', data:tags.map(x=>x.count), borderRadius:12}]},{indexAxis:'y', plugins:{legend:{display:false}}, scales:{x:{beginAtZero:true}}});
+  const notes = state.filtered.filter(r=>clean(r['Call Note'])).slice(0,8);
+  $('notesList').innerHTML = notes.length ? notes.map(r=>`<div class="p-3 rounded-2xl bg-gray-50 border"><div class="text-xs text-gray-500 font-bold">${escapeHtml(r._club)} • ${escapeHtml(r._callType)} • ${escapeHtml(r._staff)}</div><div class="text-sm mt-1">${escapeHtml(clean(r['Call Note'])).slice(0,320)}</div></div>`).join('') : '<div class="text-gray-500">No notes available.</div>';
+}
+
+function renderData(){
+  $('recordCount').textContent = `${fmt(state.filtered.length)} records`;
+  const cols = ['Call Assigned Date','Call Closed Date','Call Type','Club','Staff Name','Client Name','Phone','Contract Number','Contact Method','Returned To Train','Status Sign','Re-CSAT Score','CheckIn 30D Before Call','CheckIns After Call','Days To Return','Contract Amount'];
+  const rows = state.filtered.slice(0,500);
+  $('dataTable').innerHTML = `<thead><tr>${cols.map(c=>`<th>${c}</th>`).join('')}</tr></thead><tbody>` + rows.map(r=>`<tr>${cols.map(c=>`<td>${escapeHtml(clean(r[c]))}</td>`).join('')}</tr>`).join('') + `</tbody>`;
+}
+
+function chart(id, type, data, options={}){
+  if(state.charts[id]) state.charts[id].destroy();
+  const ctx = $(id);
+  state.charts[id] = new Chart(ctx, {type, data, options:{responsive:true, maintainAspectRatio:false, plugins:{legend:{position:'bottom', labels:{boxWidth:10, usePointStyle:true}}, tooltip:{mode:'nearest', intersect:false}, ...(options.plugins||{})}, scales: options.scales || {}, indexAxis: options.indexAxis || 'x'}});
+}
+function escapeHtml(s){ return clean(s).replace(/[&<>'"]/g, c=>({ '&':'&amp;', '<':'&lt;', '>':'&gt;', "'":'&#39;', '"':'&quot;' }[c])); }
+
+['dateField','fromDate','toDate','clubFilter','callTypeFilter','staffFilter','searchBox'].forEach(id => $(id).addEventListener('input', applyFilters));
+$('fileInput').addEventListener('change', e => { if(e.target.files?.[0]) loadCsvFile(e.target.files[0]); });
+$('reloadBtn').addEventListener('click', loadCsvFromUrl);
+document.querySelectorAll('.tab-btn').forEach(btn => btn.addEventListener('click', () => {
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.add('hidden'));
+  $(`tab-${btn.dataset.tab}`).classList.remove('hidden');
+  Object.values(state.charts).forEach(c=>c.resize());
+}));
+
+loadCsvFromUrl();
+</script>
+</body>
+</html>
