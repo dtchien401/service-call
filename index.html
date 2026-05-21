@@ -15,12 +15,12 @@
     *{box-sizing:border-box} body{font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif;background:#f5f6fa;color:var(--ink);margin:0}
     .app{display:grid;grid-template-columns:250px 1fr;min-height:100vh}.sidebar{background:radial-gradient(circle at top left,#182a42,#07111f 58%,#020712);color:#cbd5e1;padding:22px 18px;position:sticky;top:0;height:100vh;box-shadow:18px 0 40px rgba(15,23,42,.12);overflow:hidden}.sidebar:before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,0) 32%);pointer-events:none}.sidebar>*{position:relative;z-index:1}
     .brand{min-height:108px;display:flex;align-items:center;justify-content:center;margin:0 0 18px;padding:18px 14px;border:1px solid rgba(255,255,255,.08);border-radius:24px;background:rgba(255,255,255,.045);box-shadow:0 18px 45px rgba(2,7,18,.22), inset 0 1px 0 rgba(255,255,255,.07);backdrop-filter:blur(18px)}.brand-logo{width:205px;max-height:78px;object-fit:contain;display:block;filter:drop-shadow(0 12px 24px rgba(215,25,32,.22))}.brand-fallback{display:flex;align-items:center;gap:12px}.brand-mark{width:52px;height:52px;border-radius:18px;background:linear-gradient(135deg,#ef4444,#b91c1c);display:flex;align-items:center;justify-content:center;color:white;font-weight:900;font-size:20px;box-shadow:0 12px 26px rgba(215,25,32,.35)}.brand-title{font-weight:900;color:#fff;letter-spacing:.06em;font-size:18px;line-height:1}.brand-sub{font-size:10px;font-weight:800;color:#e2e8f0;margin-top:4px;letter-spacing:.05em}
-    .content{padding:26px 30px 24px;min-width:0}.topbar{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;margin-bottom:20px}.title h1{font-size:30px;line-height:1.05;margin:0;font-weight:900;letter-spacing:-.04em}.title p{margin:8px 0 0;color:#6b7280;font-size:15px}.filters{display:grid;grid-template-columns:220px 170px 190px 190px 170px;gap:12px;align-items:end}.filter{background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:10px 13px;box-shadow:0 10px 25px rgba(15,23,42,.05)}.filter label{display:block;font-size:11px;font-weight:800;color:#64748b;margin-bottom:5px}.filter select,.filter input{width:100%;border:0;outline:0;background:transparent;font-weight:700;color:#111827;font-size:13px}.statusline{text-align:right;font-size:12px;color:#94a3b8;margin-top:7px;font-weight:700}
-    .card{background:#fff;border:1px solid #e9edf3;border-radius:22px;box-shadow:0 10px 30px rgba(15,23,42,.06)}.kpi{background:linear-gradient(180deg,#fff,#fbfcff);border:1px solid #e9edf3;border-radius:22px;box-shadow:0 10px 24px rgba(15,23,42,.05)}
+    .content{padding:22px 26px 22px;min-width:0}.topbar{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;margin-bottom:16px}.title h1{font-size:28px;line-height:1.05;margin:0;font-weight:900;letter-spacing:-.04em}.title p{margin:8px 0 0;color:#6b7280;font-size:15px}.filters{display:grid;grid-template-columns:220px 170px 190px 190px 170px;gap:12px;align-items:end}.filter{background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:10px 13px;box-shadow:0 10px 25px rgba(15,23,42,.05)}.filter label{display:block;font-size:11px;font-weight:800;color:#64748b;margin-bottom:5px}.filter select,.filter input{width:100%;border:0;outline:0;background:transparent;font-weight:700;color:#111827;font-size:13px}.statusline{text-align:right;font-size:12px;color:#94a3b8;margin-top:7px;font-weight:700}
+    .card{background:#fff;border:1px solid #e9edf3;border-radius:20px;box-shadow:0 10px 30px rgba(15,23,42,.06)}.kpi{background:linear-gradient(180deg,#fff,#fbfcff);border:1px solid #e9edf3;border-radius:18px;box-shadow:0 10px 24px rgba(15,23,42,.05)}.overview-compact .card{padding:18px}.overview-compact h3{font-size:16px;line-height:1.15}.overview-compact p{font-size:12px}.overview-compact .text-xl{font-size:16px}.overview-compact .action-btn{padding:8px 14px;font-size:12px}.overview-compact .overview-table th,.overview-compact .overview-table td{padding:9px 10px;font-size:12px}.overview-compact .overview-table th{font-size:10px}.overview-compact .kpi{padding:12px}.overview-compact .kpi .text-2xl{font-size:21px}
     .tab.active{background:linear-gradient(135deg,#ff3434,#d71920);color:white;box-shadow:0 14px 28px rgba(215,25,32,.34),0 0 0 1px rgba(255,255,255,.12) inset;border-color:rgba(255,255,255,.14);transform:translateX(2px)}.tab{transition:.22s;text-align:left;width:100%;display:flex;align-items:center;gap:.85rem;border:1px solid transparent;color:#cbd5e1}.tab:not(.active):hover{background:rgba(255,255,255,.075);color:#fff;border-color:rgba(255,255,255,.08)}.tab span{font-size:18px;width:24px;text-align:center}.menu-label{font-size:10px;text-transform:uppercase;letter-spacing:.18em;font-weight:900;color:#7f8ba3;margin:18px 12px 12px;display:flex;align-items:center;gap:10px}.menu-label:after{content:"";height:1px;flex:1;background:linear-gradient(90deg,rgba(148,163,184,.35),transparent)}.side-note{position:absolute;left:18px;right:18px;bottom:22px;border:1px solid rgba(148,163,184,.18);background:rgba(255,255,255,.06);border-radius:20px;padding:16px;color:#cbd5e1}.good{color:#16a34a}.warn{color:#d97706}.bad{color:#dc2626}.neutral{color:#64748b}
-    .chartbox{position:relative;height:330px}.chartbox-sm{position:relative;height:270px}.chartbox-lg{position:relative;height:390px}table{border-collapse:separate;border-spacing:0} th{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:#64748b;background:#f8fafc;position:sticky;top:0}td,th{padding:12px 14px;border-bottom:1px solid #eef2f7}tr:hover td{background:#fcfcfd}.riskbar{height:8px;border-radius:99px;background:#e5e7eb;overflow:hidden}.riskbar>span{display:block;height:100%;background:var(--cali)}
+    .chartbox{position:relative;height:320px}.chartbox-sm{position:relative;height:245px}.chartbox-xs{position:relative;height:210px}.chartbox-lg{position:relative;height:330px}table{border-collapse:separate;border-spacing:0} th{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:#64748b;background:#f8fafc;position:sticky;top:0}td,th{padding:12px 14px;border-bottom:1px solid #eef2f7}tr:hover td{background:#fcfcfd}.riskbar{height:8px;border-radius:99px;background:#e5e7eb;overflow:hidden}.riskbar>span{display:block;height:100%;background:var(--cali)}
 
-    .funnel-row{display:grid;grid-template-columns:150px 1fr 92px;align-items:center;gap:14px;margin:15px 0}.funnel-label{font-size:14px;font-weight:900;color:#334155}.funnel-track{height:36px;background:#f1f5f9;border-radius:999px;overflow:hidden;position:relative}.funnel-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,#ef4444,#d71920);box-shadow:inset 0 0 0 1px rgba(255,255,255,.25)}.funnel-val{text-align:right;font-size:15px;font-weight:950;color:#0f172a}.mini-health{border:1px solid #e5e7eb;border-radius:18px;padding:14px;text-align:center;background:linear-gradient(180deg,#fff,#fafafa)}.mini-health .label{font-size:12px;font-weight:900}.mini-health .value{font-size:24px;font-weight:950;margin-top:4px}.mini-health .share{font-size:12px;font-weight:800;margin-top:2px}.overview-table th,.overview-table td{padding:12px 14px;white-space:nowrap}.overview-table th{font-size:11px}.overview-table td{font-size:14px}.overview-table td:first-child{white-space:normal;min-width:150px}.action-btn{display:inline-flex;align-items:center;justify-content:center;border-radius:12px;background:linear-gradient(135deg,#ef302d,#d71920);color:white;font-weight:900;font-size:13px;padding:10px 22px;box-shadow:0 10px 22px rgba(215,25,32,.25)}
+    .funnel-row{display:grid;grid-template-columns:112px 1fr 70px;align-items:center;gap:10px;margin:11px 0}.funnel-label{font-size:12px;font-weight:900;color:#334155}.funnel-track{height:28px;background:#f1f5f9;border-radius:999px;overflow:hidden;position:relative}.funnel-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,#ef4444,#d71920);box-shadow:inset 0 0 0 1px rgba(255,255,255,.25)}.funnel-val{text-align:right;font-size:13px;font-weight:950;color:#0f172a}.mini-health{border:1px solid #e5e7eb;border-radius:16px;padding:11px;text-align:center;background:linear-gradient(180deg,#fff,#fafafa)}.mini-health .label{font-size:12px;font-weight:900}.mini-health .value{font-size:20px;font-weight:950;margin-top:4px}.mini-health .share{font-size:12px;font-weight:800;margin-top:2px}.overview-table th,.overview-table td{padding:12px 14px;white-space:nowrap}.overview-table th{font-size:11px}.overview-table td{font-size:14px}.overview-table td:first-child{white-space:normal;min-width:150px}.action-btn{display:inline-flex;align-items:center;justify-content:center;border-radius:12px;background:linear-gradient(135deg,#ef302d,#d71920);color:white;font-weight:900;font-size:13px;padding:10px 22px;box-shadow:0 10px 22px rgba(215,25,32,.25)}
     @media(max-width:1200px){.app{grid-template-columns:1fr}.sidebar{position:relative;height:auto;padding:16px}.brand{min-height:86px;margin-bottom:12px}.brand-logo{width:190px;max-height:64px}.side-note{display:none}.topbar{flex-direction:column}.filters{grid-template-columns:repeat(2,minmax(0,1fr));width:100%}.content{padding:18px}.chartbox,.chartbox-sm,.chartbox-lg{height:300px}.desktop-table{min-width:900px}.tabs-wrap{display:flex;overflow-x:auto}.tab{white-space:nowrap;min-width:210px}}
 
   </style>
@@ -67,66 +67,68 @@
         <div id="loadStatus" class="statusline">Loading servicecall.csv...</div>
       </div>
     </div>
-<section id="overview" class="tabpane">
-        <div id="kpiGrid" class="grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-8 gap-3 mb-5"></div>
+<section id="overview" class="tabpane overview-compact">
+        <div id="kpiGrid" class="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-8 gap-3 mb-4"></div>
 
-        <!-- Row 1: only 2 boxes for better readability -->
-        <div class="grid grid-cols-1 xl:grid-cols-12 gap-5 mb-5">
-          <div class="card p-6 xl:col-span-7">
-            <div class="flex items-start justify-between gap-3 mb-2">
+        <!-- Executive overview: 3 boxes per row for a cleaner full-page snapshot -->
+        <div class="grid grid-cols-1 xl:grid-cols-12 gap-4 mb-4">
+          <div class="card xl:col-span-4">
+            <div class="flex items-start justify-between gap-3 mb-1">
               <div>
-                <h3 class="font-extrabold text-xl tracking-tight">Customer Service Impact Funnel</h3>
-                <p class="text-sm text-slate-500">Assigned → Contacted → Closed → Returned → Signed</p>
+                <h3 class="font-extrabold tracking-tight">Customer Service Impact Funnel</h3>
+                <p class="text-slate-500">Assigned → Contacted → Closed → Returned → Signed</p>
               </div>
-              <div class="text-xs font-black text-slate-400 uppercase tracking-widest">Impact</div>
+              <div class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Impact</div>
             </div>
-            <div id="impactFunnel" class="mt-5"></div>
-            <div id="funnelConversion" class="mt-5 text-center text-base font-extrabold bg-red-50 text-red-700 rounded-2xl py-4"></div>
+            <div id="impactFunnel" class="mt-3"></div>
+            <div id="funnelConversion" class="mt-3 text-center text-sm font-extrabold bg-red-50 text-red-700 rounded-2xl py-3"></div>
           </div>
 
-          <div class="card p-6 xl:col-span-5">
-            <h3 class="font-extrabold text-xl tracking-tight">Cases by Call Type</h3>
-            <p class="text-sm text-slate-500 mb-3">Volume mix of service reasons</p>
-            <div class="chartbox-lg"><canvas id="typeChart"></canvas></div>
+          <div class="card xl:col-span-4">
+            <h3 class="font-extrabold tracking-tight">Cases by Call Type</h3>
+            <p class="text-slate-500 mb-2">Service reason mix</p>
+            <div class="chartbox-sm"><canvas id="typeChart"></canvas></div>
+          </div>
+
+          <div class="card xl:col-span-4">
+            <h3 class="font-extrabold tracking-tight">Customer Health Overview</h3>
+            <div id="overviewRiskCards" class="grid grid-cols-2 gap-2 mt-3 mb-3"></div>
+            <h4 class="font-extrabold text-xs text-slate-700">Customer Aging <span class="font-medium text-slate-400">after call</span></h4>
+            <div class="chartbox-xs"><canvas id="overviewAgingChart"></canvas></div>
           </div>
         </div>
 
-        <!-- Row 2: trend and customer health moved down; 2 boxes only -->
-        <div class="grid grid-cols-1 xl:grid-cols-12 gap-5 mb-5">
-          <div class="card p-6 xl:col-span-7">
-            <h3 class="font-extrabold text-xl tracking-tight">Trend Over Time</h3>
-            <p class="text-sm text-slate-500 mb-3">Closed, Returned and Signed cases</p>
-            <div class="chartbox-lg"><canvas id="trendChart"></canvas></div>
+        <div class="grid grid-cols-1 xl:grid-cols-12 gap-4">
+          <div class="card xl:col-span-4">
+            <h3 class="font-extrabold tracking-tight">Trend Over Time</h3>
+            <p class="text-slate-500 mb-2">Closed, Returned and Signed</p>
+            <div class="chartbox-sm"><canvas id="trendChart"></canvas></div>
           </div>
-          <div class="card p-6 xl:col-span-5">
-            <h3 class="font-extrabold text-xl tracking-tight">Customer Health Overview</h3>
-            <div id="overviewRiskCards" class="grid grid-cols-2 gap-3 mt-4 mb-5"></div>
-            <h4 class="font-extrabold text-sm text-slate-700">Customer Aging <span class="font-medium text-slate-400">(based on check-ins after call)</span></h4>
-            <div class="chartbox"><canvas id="overviewAgingChart"></canvas></div>
-          </div>
-        </div>
 
-        <!-- Row 3: tables have more width; no more cut-off text -->
-        <div class="grid grid-cols-1 xl:grid-cols-2 gap-5">
-          <div class="card p-6">
-            <h3 class="font-extrabold text-xl tracking-tight mb-4">Top Clubs Performance</h3>
+          <div class="card xl:col-span-4">
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="font-extrabold tracking-tight">Top Clubs Performance</h3>
+              <button class="action-btn" onclick="goTab('club')">All clubs</button>
+            </div>
             <div class="overflow-auto">
               <table class="w-full overview-table">
-                <thead><tr><th>Club</th><th>Cases</th><th>Return %</th><th>Sign %</th><th>CSAT</th><th>Risk</th></tr></thead>
+                <thead><tr><th>Club</th><th>Cases</th><th>Return</th><th>Sign</th><th>Risk</th></tr></thead>
                 <tbody id="overviewClubTable"></tbody>
               </table>
             </div>
-            <div class="text-center mt-5"><button class="action-btn" onclick="goTab('club')">View all clubs</button></div>
           </div>
-          <div class="card p-6">
-            <h3 class="font-extrabold text-xl tracking-tight mb-4">Staff Performance <span class="text-sm text-slate-400">(Top 5 by Score)</span></h3>
+
+          <div class="card xl:col-span-4">
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="font-extrabold tracking-tight">Staff Performance</h3>
+              <button class="action-btn" onclick="goTab('staff')">All staff</button>
+            </div>
             <div class="overflow-auto">
               <table class="w-full overview-table">
-                <thead><tr><th>Staff</th><th>Cases</th><th>Closed</th><th>Return %</th><th>Sign %</th><th>Score</th></tr></thead>
+                <thead><tr><th>Staff</th><th>Cases</th><th>Return</th><th>Sign</th><th>Score</th></tr></thead>
                 <tbody id="overviewStaffTable"></tbody>
               </table>
             </div>
-            <div class="text-center mt-5"><button class="action-btn" onclick="goTab('staff')">View all staff</button></div>
           </div>
         </div>
       </section>
@@ -240,7 +242,7 @@ function renderOverview(){
   $('funnelConversion').textContent=`Conversion from Assigned to Signed: ${pct(signed/(assigned||1))}`;
 
   const types=topEntries(by(r,x=>clean(x['Call Type'])), rows=>({value:rows.length}), 6);
-  makeChart('typeChart',{type:'doughnut',data:{labels:types.map(x=>x.k),datasets:[{data:types.map(x=>x.value),borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,cutout:'58%',plugins:{legend:{position:'right',labels:{boxWidth:10,font:{weight:'700'}}},tooltip:{callbacks:{label:ctx=>`${ctx.label}: ${fmt(ctx.raw)} (${pct(ctx.raw/(r.length||1))})`}}}}});
+  makeChart('typeChart',{type:'doughnut',data:{labels:types.map(x=>x.k),datasets:[{data:types.map(x=>x.value),borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,cutout:'58%',plugins:{legend:{position:'bottom',labels:{boxWidth:10,font:{weight:'700'},padding:10}},tooltip:{callbacks:{label:ctx=>`${ctx.label}: ${fmt(ctx.raw)} (${pct(ctx.raw/(r.length||1))})`}}}}});
 
   const months=Object.entries(by(r,x=>monthKey(x.EOM))).sort(([a],[b])=>a.localeCompare(b));
   makeChart('trendChart',{type:'line',data:{labels:months.map(x=>x[0]),datasets:[{label:'Closed Cases',data:months.map(x=>x[1].filter(isClosed).length),tension:.35,borderWidth:3,pointRadius:3},{label:'Returned To Train',data:months.map(x=>x[1].filter(isReturned).length),tension:.35,borderWidth:3,pointRadius:3},{label:'Signed',data:months.map(x=>x[1].filter(isSigned).length),tension:.35,borderWidth:3,pointRadius:3}]},options:commonOptions({plugins:{legend:{display:true,position:'top'}},scales:{x:{grid:{display:false}},y:{beginAtZero:true,grid:{color:'#eef2f7'}}}})});
@@ -251,12 +253,12 @@ function renderOverviewTables(r){
   const clubGroups=by(r,x=>clean(x.Club));
   let clubs=Object.entries(clubGroups).map(([club,rows])=>({club,...clubMetrics(rows)})).filter(x=>x.cases>=5);
   clubs.sort((a,b)=>(b.ret*50+b.sign*30+(b.csat||0)*4) - (a.ret*50+a.sign*30+(a.csat||0)*4));
-  $('overviewClubTable').innerHTML=clubs.slice(0,5).map(x=>{const risk=Math.min(100,Math.round((1-x.ret)*55+(1-x.sign)*25+(1-x.closed)*20)); const dot=risk<35?'🟢':risk<60?'🟡':risk<80?'🟠':'🔴'; return `<tr><td class="font-bold">${x.club}</td><td>${fmt(x.cases)}</td><td class="font-bold ${x.ret>=.6?'good':x.ret>=.35?'warn':'bad'}">${pct(x.ret)}</td><td>${pct(x.sign)}</td><td>${x.csat?x.csat.toFixed(2):'-'}</td><td>${dot}</td></tr>`}).join('');
+  $('overviewClubTable').innerHTML=clubs.slice(0,4).map(x=>{const risk=Math.min(100,Math.round((1-x.ret)*55+(1-x.sign)*25+(1-x.closed)*20)); const dot=risk<35?'🟢':risk<60?'🟡':risk<80?'🟠':'🔴'; return `<tr><td class="font-bold">${x.club}</td><td>${fmt(x.cases)}</td><td class="font-bold ${x.ret>=.6?'good':x.ret>=.35?'warn':'bad'}">${pct(x.ret)}</td><td>${pct(x.sign)}</td><td>${dot}</td></tr>`}).join('');
 
   const staffGroups=by(r,x=>clean(x['Staff Name']));
   let staff=Object.entries(staffGroups).map(([staff,rows])=>({staff,...staffMetrics(rows)})).filter(x=>x.cases>=3);
   const maxCases=Math.max(1,...staff.map(x=>x.cases)); staff.forEach(x=>x.score=scoreStaff(x,maxCases)); staff.sort((a,b)=>b.score-a.score);
-  $('overviewStaffTable').innerHTML=staff.slice(0,5).map(x=>`<tr><td class="font-bold">${x.staff}</td><td>${fmt(x.cases)}</td><td>${fmt(Math.round(x.closed*x.cases))}</td><td class="font-bold ${x.ret>=.6?'good':x.ret>=.35?'warn':'bad'}">${pct(x.ret)}</td><td>${pct(x.sign)}</td><td class="font-black">${x.score}</td></tr>`).join('');
+  $('overviewStaffTable').innerHTML=staff.slice(0,4).map(x=>`<tr><td class="font-bold">${x.staff}</td><td>${fmt(x.cases)}</td><td class="font-bold ${x.ret>=.6?'good':x.ret>=.35?'warn':'bad'}">${pct(x.ret)}</td><td>${pct(x.sign)}</td><td class="font-black">${x.score}</td></tr>`).join('');
 
   const risk=classifyRisk(r); const total=r.length||1;
   const meta={Healthy:['good','0 - 7 days'],Warm:['warn','8 - 14 days'],Cold:['warn','15 - 30 days'],Lost:['bad','30+ days']};
