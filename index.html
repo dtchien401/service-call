@@ -179,6 +179,12 @@ const pct = n => isFinite(n) ? (n*100).toFixed(1)+'%' : '0.0%';
 const avg = arr => arr.length ? arr.reduce((a,b)=>a+b,0)/arr.length : 0;
 const num = v => { if(v===null||v===undefined||v==='') return 0; const x=Number(String(v).replace(/,/g,'')); return isFinite(x)?x:0; };
 const clean = v => (v===null||v===undefined) ? '' : String(v).trim();
+function maskPhone(phone){
+  const p = clean(phone).replace(/\D/g,'');
+  if(!p) return '-';
+  if(p.length >= 7) return p.slice(0,3) + '****' + p.slice(-3);
+  return '***';
+}
 function parseDate(v){
   if(!v) return null; if(v instanceof Date) return v;
   const s=String(v).trim(); if(!s) return null;
@@ -293,7 +299,7 @@ function renderCustomer(){
   const buckets={'0-3 days':0,'4-7 days':0,'8-14 days':0,'15-30 days':0,'30+ days':0,'No return':0}; filteredRows.forEach(r=>{const d=num(r['Days To Return']); if(!isReturned(r)) buckets['No return']++; else if(d<=3) buckets['0-3 days']++; else if(d<=7) buckets['4-7 days']++; else if(d<=14) buckets['8-14 days']++; else if(d<=30) buckets['15-30 days']++; else buckets['30+ days']++;});
   makeChart('returnDaysChart',{type:'bar',data:{labels:Object.keys(buckets),datasets:[{label:'Cases',data:Object.values(buckets),borderRadius:12}]},options:commonOptions({plugins:{legend:{display:false}}})});
   const sorted=[...filteredRows].sort((a,b)=>(parseDate(b['Call Assigned Date'])||0)-(parseDate(a['Call Assigned Date'])||0)).slice(0,120);
-  $('caseTable').innerHTML=sorted.map(r=>`<tr><td class="font-bold">${clean(r['Client Name'])}</td><td>${clean(r.Phone)}</td><td>${clean(r.Club)}</td><td>${clean(r['Call Type'])}</td><td>${clean(r['Stage Status'])}</td><td>${fmt(num(r['CheckIn 30D Before Call']))}</td><td>${fmt(num(r['CheckIns After Call']))}</td><td>${isReturned(r)?'✅':'—'}</td><td>${isSigned(r)?'✅':'—'}</td></tr>`).join('');
+  $('caseTable').innerHTML=sorted.map(r=>`<tr><td class="font-bold">${clean(r['Client Name'])}</td><td>${maskPhone(r.Phone)}</td><td>${clean(r.Club)}</td><td>${clean(r['Call Type'])}</td><td>${clean(r['Stage Status'])}</td><td>${fmt(num(r['CheckIn 30D Before Call']))}</td><td>${fmt(num(r['CheckIns After Call']))}</td><td>${isReturned(r)?'✅':'—'}</td><td>${isSigned(r)?'✅':'—'}</td></tr>`).join('');
 }
 function renderRoot(){
   const groups=by(filteredRows,r=>clean(r['Tag Complaint'])||'No Tag'); const data=Object.entries(groups).map(([tag,rows])=>{const clubs=Object.entries(by(rows,r=>clean(r.Club))).sort((a,b)=>b[1].length-a[1].length).slice(0,3).map(x=>`${x[0]} (${x[1].length})`).join(', '); const cs=rows.map(csatVal).filter(Boolean); return {tag,cases:rows.length,ret:rate(rows,isReturned),sign:rate(rows,isSigned),csat:avg(cs),clubs};}).sort((a,b)=>b.cases-a.cases);
